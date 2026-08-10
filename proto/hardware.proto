@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+message JointTarget {
+    repeated double positions = 1;
+}
+
+message ArmState {
+    repeated double positions = 1;
+    bool is_moving = 2;
+}
+
+message Empty {}
+
+message StatusReply {
+    bool success = 1;
+    string message = 2;
+}
+
+service ArmHardware {
+  rpc MoveJoints(JointTarget) returns (StatusReply);
+  rpc GetStatus(Empty) returns (ArmState);
+}

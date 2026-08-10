@@ -1,0 +1,31 @@
+{
+  "template": "https://gitlab.com/unitelabs/cdk/connector-factory.git",
+  "commit": "aca44a430af501284458337df3c03e1669cf1a31",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "connector_name": "dev-c",
+      "project_name": "pro-c",
+      "package_name": "usila_c",
+      "__package_import_name": "unitelabs.usila_c",
+      "__protocol_name": "ProC",
+      "project_description": "gy-dev",
+      "author_full_name": "klaus.mikaelson",
+      "author_email": "mexico.zyy@gmail.com",
+      "project_repo": "https://github.com/Mexico-zyy-lost/unitelabs-sila.git",
+      "communication_type": "none",
+      "env": "uv",
+      "_render_devdocs": false,
+      "_jinja2_env_vars": {
+        "lstrip_blocks": true,
+        "trim_blocks": true
+      },
+      "_extensions": [
+        "internal_ext.IsInternalExtension"
+      ],
+      "_template": "https://gitlab.com/unitelabs/cdk/connector-factory.git",
+      "_commit": "aca44a430af501284458337df3c03e1669cf1a31"
+    }
+  },
+  "directory": null
+}

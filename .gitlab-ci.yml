@@ -1,0 +1,30 @@
+include:
+  - project: "unitelabs/internal/ci-cd"
+    ref: main
+    file: "/pipelines/python/app-uv.gitlab-ci.yml"
+
+variables:
+  BASE_LAYER: trixie-slim
+  UV_VERSION: 0.9.6
+  UV_CACHE_DIR: .uv-cache
+  UV_FROZEN: true
+  UV_PUBLISH_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi"
+  UV_PUBLISH_USERNAME: gitlab-ci-token
+  UV_PUBLISH_PASSWORD: "${CI_JOB_TOKEN}"
+  UV_INDEX_UNITELABS_USERNAME: gitlab-ci-token
+  UV_INDEX_UNITELABS_PASSWORD: "$CI_JOB_TOKEN"
+  PYTHON_VERSION: 3.13
+  PYTHON_MIN_VERSION: "3.10"
+  PYTHON_MAX_VERSION: "3.14"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  VENV_DIR: ".venv"
+  GITLAB_TOKEN: ${UNITELABS_CI_RELEASER_TOKEN}
+  DEFAULT_UV_IMAGE: "ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}"
+  UV_LINK_MODE: copy
+  LINUX_X86_64_TARGET: x86_64-unknown-linux-gnu
+  LINUX_AARCH64_TARGET: aarch64-unknown-linux-gnu
+  MACOS_AARCH64_TARGET: aarch64-apple-darwin
+  WINDOWS_X86_64_TARGET: x86_64-pc-windows-msvc
+  BUNDLER_REPO_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/unitelabs/cdk/bundler.git"
+  BUNDLER_REPO_BRANCH: "main"
+  BASE_GENERIC_PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}"
