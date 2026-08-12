@@ -25,6 +25,7 @@ requires-python=">=3.10,<4.0"
 dependencies=[
     "grpcio-tools>=1.83.0",
     "unitelabs-cdk~=0.13.6",
+    "unitelabs-sila>=0.9.4",
 ]
 
 [project.urls]

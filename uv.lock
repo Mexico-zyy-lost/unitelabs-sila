@@ -2005,6 +2005,7 @@ source = { editable = "." }
 dependencies = [
     { name = "grpcio-tools" },
     { name = "unitelabs-cdk" },
+    { name = "unitelabs-sila" },
 ]
 
 [package.optional-dependencies]
@@ -2031,6 +2032,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "unitelabs-cdk", specifier = "~=0.13.6" },
     { name = "unitelabs-cdk", extras = ["dev"], marker = "extra == 'dev'" },
+    { name = "unitelabs-sila", specifier = ">=0.9.4" },
 ]
 provides-extras = ["test", "dev"]
 
