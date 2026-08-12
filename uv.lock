@@ -2004,6 +2004,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "grpcio-tools" },
+    { name = "pyyaml" },
     { name = "unitelabs-cdk" },
     { name = "unitelabs-sila" },
 ]
@@ -2029,6 +2030,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'" },
     { name = "pytest-asyncio", marker = "extra == 'test'" },
     { name = "pytest-cov", marker = "extra == 'test'" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "unitelabs-cdk", specifier = "~=0.13.6" },
     { name = "unitelabs-cdk", extras = ["dev"], marker = "extra == 'dev'" },
