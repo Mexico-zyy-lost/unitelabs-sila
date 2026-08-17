@@ -1,13 +1,8 @@
 import logging
+import asyncio
 from unitelabs.cdk import sila
 from unitelabs.usila_c.socket_client import UdsClient
 import socket
-
-# from unitelabs.cdk.sila.errors import (
-#     CommandExecutionError,
-#     DeviceError,
-#     DeviceCommunicationError
-# )
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +36,6 @@ class BalanceFeature(sila.Feature):
         # 👉 先尝试懒连接
         await self._ensure_conn()
 
-        # is_connected 同步方法，不要加await
-        # if not self.uds.is_connected():
-        #     raise sila.DeviceError("UDS socket客户端未连接天平后端")
-
         return self.uds
 
     async def _ensure_conn(self):
@@ -63,13 +54,14 @@ class BalanceFeature(sila.Feature):
         if ret_code != 0:
             err_msg = resp.get("msg", "tare command failed")
             raise BalanceCommandError(f"Balance tare fail, code={ret_code}, msg={err_msg}")
-        # if resp["status"] != "fine":
-        #     raise sila.CommandExecutionError(f"Balance tare fail:{resp}")
 
     @sila.ObservableProperty()
     async def GrossWeightGram(self) -> float:
         while True:
-        uds = await self._get_uds()
-        resp = await uds.send_request(cmd="Balance.GetGrossWeight", params={})
-        yield float(resp["result"]["weight_g"])
-        await asyncio.sleep(0.2) #轮询间隔
+            try:
+                uds = await self._get_uds()
+                resp = await uds.send_request(cmd="Balance.GetGrossWeight", params={})
+                yield float(resp["result"]["weight_g"])
+            except Exception as e:
+                print(f"读取天平异常 {e}")
+            await asyncio.sleep(2) #轮询间隔
