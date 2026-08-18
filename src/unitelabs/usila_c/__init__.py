@@ -7,7 +7,11 @@ from unitelabs.cdk import Connector, ConnectorBaseConfig, SiLAServerConfig
 
 from unitelabs.usila_c.feature.balance import BalanceFeature
 from unitelabs.usila_c.feature.deviceBase import DeviceBaseFeature
+from unitelabs.usila_c.feature.lidHandling import LidHandlingFeature
+from unitelabs.usila_c.feature.liquidHandling import LiquidHandlingFeature
 from unitelabs.usila_c.feature.powderDosing import PowderDosingFeature
+from unitelabs.usila_c.feature.transfer import TransferFeature
+from unitelabs.usila_c.feature.vortex import VortexFeature
 from unitelabs.usila_c.socket_client import UdsClient
 
 __version__ = version("unitelabs-pro-c")
@@ -51,6 +55,19 @@ async def create_app(config: ProCConfig) -> collections.abc.AsyncGenerator[Conne
 
         powderDosing_feat = PowderDosingFeature(uds=SHARED_UDS)
         app.register(powderDosing_feat)
+
+        liquidHandling_feat = LiquidHandlingFeature(uds=SHARED_UDS)
+        app.register(liquidHandling_feat)
+
+        lidHandling_feat = LidHandlingFeature(uds=SHARED_UDS)
+        app.register(lidHandling_feat)
+
+        transfer_feat = TransferFeature(uds=SHARED_UDS)
+        app.register(transfer_feat)
+
+        vortex_feat = VortexFeature(uds=SHARED_UDS)
+        app.register(vortex_feat)
+
     except ValueError:
         traceback.print_exc()
         raise
