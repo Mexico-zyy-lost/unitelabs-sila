@@ -1,17 +1,19 @@
-import traceback
 import collections.abc
 import dataclasses
+import traceback
 from importlib.metadata import version
 
 from unitelabs.cdk import Connector, ConnectorBaseConfig, SiLAServerConfig
-from unitelabs.usila_c.socket_client import UdsClient
 
 from unitelabs.usila_c.feature.balance import BalanceFeature
 from unitelabs.usila_c.feature.deviceBase import DeviceBaseFeature
+from unitelabs.usila_c.feature.powderDosing import PowderDosingFeature
+from unitelabs.usila_c.socket_client import UdsClient
 
 __version__ = version("unitelabs-pro-c")
 # 模块全局变量，供BalanceFeature获取UDS客户端
 SHARED_UDS: UdsClient | None = None
+
 
 @dataclasses.dataclass
 class ProCConfig(ConnectorBaseConfig):
@@ -44,12 +46,15 @@ async def create_app(config: ProCConfig) -> collections.abc.AsyncGenerator[Conne
         balance_feat = BalanceFeature(uds=SHARED_UDS)
         app.register(balance_feat)
 
-        deviceBase_feat = DeviceBaseFeature(uds=SHARED_UDS);
-        app.register(deviceBase_feat);
-    except ValueError as e:
+        deviceBase_feat = DeviceBaseFeature(uds=SHARED_UDS)
+        app.register(deviceBase_feat)
+
+        powderDosing_feat = PowderDosingFeature(uds=SHARED_UDS)
+        app.register(powderDosing_feat)
+    except ValueError:
         traceback.print_exc()
         raise
-   
+
     print("✅ Manually registered BalanceFeature && DeviceBase with UDS client injected")
 
     yield app
