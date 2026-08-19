@@ -3,7 +3,7 @@ import logging
 
 from unitelabs.cdk import sila
 
-from unitelabs.usila_c.feature.deviceBase import (
+from unitelabs.usila_c.feature.devicebase import (
     CommandResult,
     DeviceCommandError,
 )
