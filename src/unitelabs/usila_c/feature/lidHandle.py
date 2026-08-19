@@ -17,16 +17,16 @@ logger = logging.getLogger(__name__)
 # LiquidHandling Feature，UDS外部注入，和DeviceBaseFeature架构对齐
 # 提供分液功能
 # -----------------------------------------------------------------------------
-class LiquidHandlingFeature(sila.Feature):
+class LIDFeature(sila.Feature):
     def __init__(self, uds: UdsClient):
         super().__init__(
-            identifier="LiquidHandling",
-            name="分液模块",
+            identifier="LID",
+            name="LID",
             category="application",
             version="1.0",
             description="提供分液功能",
         )
-        logger.info("🟢 LiquidHandlingFeature initialized, UDS injected")
+        logger.info("🟢 LIDFeature initialized, UDS injected")
         self.uds: UdsClient = uds
         self._connected: bool = False
 
@@ -40,10 +40,10 @@ class LiquidHandlingFeature(sila.Feature):
     async def _ensure_conn(self):
         """懒连接，第一次命令调用才建立UDS连接"""
         if not self._connected:
-            logger.info("LiquidHandlingFeature: 正在建立UDS连接 ...")
+            logger.info("LIDFeature: 正在建立UDS连接 ...")
             await self.uds.connect()
             self._connected = True
-            logger.info("✅ LiquidHandlingFeature UDS连接完成")
+            logger.info("✅ LIDFeature UDS连接完成")
 
     # ------------------------------
     # Commands
@@ -75,7 +75,7 @@ class LiquidHandlingFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发安装指令至下位机")
 
-            resp = await uds.send_request(cmd="LiquidHandling.AttachTip", params=req_params)
+            resp = await uds.send_request(cmd="LID.AttachTip", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -152,7 +152,7 @@ class LiquidHandlingFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发吸液指令至下位机")
 
-            resp = await uds.send_request(cmd="LiquidHandling.Aspirate", params=req_params)
+            resp = await uds.send_request(cmd="LID.Aspirate", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
@@ -230,7 +230,7 @@ class LiquidHandlingFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发排液指令至下位机")
 
-            resp = await uds.send_request(cmd="LiquidHandling.Dispense", params=req_params)
+            resp = await uds.send_request(cmd="LID.Dispense", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
@@ -299,7 +299,7 @@ class LiquidHandlingFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发退Tip指令至下位机")
 
-            resp = await uds.send_request(cmd="LiquidHandling.EjectTip", params=req_params)
+            resp = await uds.send_request(cmd="LID.EjectTip", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

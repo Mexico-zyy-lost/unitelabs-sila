@@ -15,19 +15,19 @@ logger = logging.getLogger(__name__)
 
 
 # -----------------------------------------------------------------------------
-# LidHandling Feature，UDS外部注入，和DeviceBaseFeature架构对齐
+# CAP Feature，UDS外部注入，和DeviceBaseFeature架构对齐
 # 提供容器开关盖功能
 # -----------------------------------------------------------------------------
-class LidHandlingFeature(sila.Feature):
+class CAPFeature(sila.Feature):
     def __init__(self, uds: UdsClient):
         super().__init__(
-            identifier="LidHandling",
-            name="容器开关盖模块",
+            identifier="CAP",
+            name="CAP",
             category="application",
             version="1.0",
             description="提供容器开关盖功能",
         )
-        logger.info("🟢 LidHandlingFeature initialized, UDS injected")
+        logger.info("🟢 CAPFeature initialized, UDS injected")
         self.uds: UdsClient = uds
         self._connected: bool = False
 
@@ -41,21 +41,21 @@ class LidHandlingFeature(sila.Feature):
     async def _ensure_conn(self):
         """懒连接，第一次命令调用才建立UDS连接"""
         if not self._connected:
-            logger.info("LidHandlingFeature: 正在建立UDS连接 ...")
+            logger.info("CAPFeature: 正在建立UDS连接 ...")
             await self.uds.connect()
             self._connected = True
-            logger.info("✅ LidHandlingFeature UDS连接完成")
+            logger.info("✅ CAPFeature UDS连接完成")
 
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="OpenLid", errors=[DeviceCommandError])
-    async def OpenLid(
+    @sila.ObservableCommand(name="OpenCap", errors=[DeviceCommandError])
+    async def OpenCap(
         self,
         *,
         container_diameter: float,
         open_position: Position3D,
-        lid_place_position: Position3D,
+        cap_place_position: Position3D,
         open_gripper_param: GripperParam,
         close_gripper_param: GripperParam,
         rotation_cycles: int,
@@ -70,7 +70,7 @@ class LidHandlingFeature(sila.Feature):
 
         .. parameter:: container_diameter: 容器直径（单位 mm）
         .. parameter:: open_position: 开盖位置（逻辑坐标，单位 mm）
-        .. parameter:: lid_place_position: 盖子放置位置（逻辑坐标，单位 mm）
+        .. parameter:: cap_place_position: 盖子放置位置（逻辑坐标，单位 mm）
         .. parameter:: open_gripper_param: 开盖夹爪参数
         .. parameter:: close_gripper_param: 关盖夹爪参数
         .. parameter:: rotation_cycles: 旋转圈数
@@ -90,7 +90,7 @@ class LidHandlingFeature(sila.Feature):
             req_params = {
                 "container_diameter": container_diameter,
                 "open_position": {"x": open_position.x, "y": open_position.y, "z": open_position.z},
-                "lid_place_position": {"x": lid_place_position.x, "y": lid_place_position.y, "z": lid_place_position.z},
+                "cap_place_position": {"x": cap_place_position.x, "y": cap_place_position.y, "z": cap_place_position.z},
                 "open_gripper_param": {"position": open_gripper_param.position, "force": open_gripper_param.force},
                 "close_gripper_param": {"position": close_gripper_param.position, "force": close_gripper_param.force},
                 "rotation_cycles": rotation_cycles,
@@ -108,14 +108,14 @@ class LidHandlingFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发开盖指令至下位机")
 
-            resp = await uds.send_request(cmd="LidHandling.OpenLid", params=req_params)
+            resp = await uds.send_request(cmd="CAP.OpenCap", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "OpenLid command failed")
-                raise DeviceCommandError(f"OpenLid fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "OpenCap command failed")
+                raise DeviceCommandError(f"OpenCap fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("开盖完成")
@@ -137,14 +137,14 @@ class LidHandlingFeature(sila.Feature):
             intermediate.send(f"开盖失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
         except Exception as e:
-            logger.exception("OpenLid exception")
+            logger.exception("OpenCap exception")
             status.update(progress=1.0)
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
-    @sila.ObservableCommand(name="CloseLid", errors=[DeviceCommandError])
-    async def CloseLid(
+    @sila.ObservableCommand(name="CloseCap", errors=[DeviceCommandError])
+    async def CloseCap(
         self,
         *,
         close_position: Position3D,
@@ -187,14 +187,14 @@ class LidHandlingFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发关盖指令至下位机")
 
-            resp = await uds.send_request(cmd="LidHandling.CloseLid", params=req_params)
+            resp = await uds.send_request(cmd="CAP.CloseCap", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "CloseLid command failed")
-                raise DeviceCommandError(f"CloseLid fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "CloseCap command failed")
+                raise DeviceCommandError(f"CloseCap fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("关盖完成")
@@ -215,7 +215,7 @@ class LidHandlingFeature(sila.Feature):
             intermediate.send(f"关盖失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
         except Exception as e:
-            logger.exception("CloseLid exception")
+            logger.exception("CloseCap exception")
             status.update(progress=1.0)
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)

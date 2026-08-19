@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 # Vortex Feature，UDS外部注入，和DeviceBaseFeature架构对齐
 # 提供振荡功能
 # -----------------------------------------------------------------------------
-class VortexFeature(sila.Feature):
+class ZDFeature(sila.Feature):
     def __init__(self, uds: UdsClient):
         super().__init__(
-            identifier="Vortex", name="震荡模块", category="application", version="1.0", description="提供粉体振荡功能"
+            identifier="ZD", name="ZD", category="application", version="1.0", description="提供粉体振荡功能"
         )
-        logger.info("🟢 VortexFeature initialized, UDS injected")
+        logger.info("🟢 ZDFeature initialized, UDS injected")
         self.uds: UdsClient = uds
         self._connected: bool = False
 
@@ -35,10 +35,10 @@ class VortexFeature(sila.Feature):
     async def _ensure_conn(self):
         """懒连接，第一次命令调用才建立UDS连接"""
         if not self._connected:
-            logger.info("VortexFeature: 正在建立UDS连接 ...")
+            logger.info("ZDFeature: 正在建立UDS连接 ...")
             await self.uds.connect()
             self._connected = True
-            logger.info("✅ VortexFeature UDS连接完成")
+            logger.info("✅ ZDFeature UDS连接完成")
 
     # ------------------------------
     # Commands
@@ -68,7 +68,7 @@ class VortexFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发振荡指令至下位机")
 
-            resp = await uds.send_request(cmd="Vortex.StartVortex", params=req_params)
+            resp = await uds.send_request(cmd="ZD.StartVortex", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

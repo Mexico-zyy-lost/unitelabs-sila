@@ -17,16 +17,16 @@ logger = logging.getLogger(__name__)
 # PowderDosing Feature，UDS外部注入，和DeviceBaseFeature架构对齐
 # 提供粉体装载、卸载、取粉、吐粉功能
 # -----------------------------------------------------------------------------
-class PowderDosingFeature(sila.Feature):
+class FFQFeature(sila.Feature):
     def __init__(self, uds: UdsClient):
         super().__init__(
-            identifier="PowderDosing",
-            name="分粉模块",
+            identifier="FFQ",
+            name="FFQ",
             category="application",
             version="1.0",
             description="提供粉体装载、卸载、取粉、吐粉功能",
         )
-        logger.info("🟢 PowderDosingFeature initialized, UDS injected")
+        logger.info("🟢 FFQFeature initialized, UDS injected")
         self.uds: UdsClient = uds
         self._connected: bool = False
 
@@ -40,10 +40,10 @@ class PowderDosingFeature(sila.Feature):
     async def _ensure_conn(self):
         """懒连接，第一次命令调用才建立UDS连接"""
         if not self._connected:
-            logger.info("PowderDosingFeature: 正在建立UDS连接 ...")
+            logger.info("FFQFeature: 正在建立UDS连接 ...")
             await self.uds.connect()
             self._connected = True
-            logger.info("✅ PowderDosingFeature UDS连接完成")
+            logger.info("✅ FFQFeature UDS连接完成")
 
     # ------------------------------
     # Commands
@@ -71,7 +71,7 @@ class PowderDosingFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="PowderDosing.LoadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="FFQ.LoadPowderBucket", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -129,7 +129,7 @@ class PowderDosingFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="PowderDosing.UnloadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="FFQ.UnloadPowderBucket", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -205,7 +205,7 @@ class PowderDosingFeature(sila.Feature):
             status.update(progress=0.4)
             intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="PowderDosing.PickPowder", params=req_params)
+            resp = await uds.send_request(cmd="FFQ.PickPowder", params=req_params)
 
             status.update(progress=0.85)
             ret_code = resp.get("code", -1)
@@ -265,7 +265,7 @@ class PowderDosingFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="PowderDosing.DispensePowder", params=req_params)
+            resp = await uds.send_request(cmd="FFQ.DispensePowder", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

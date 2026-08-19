@@ -18,16 +18,16 @@ logger = logging.getLogger(__name__)
 # Transfer Feature，UDS外部注入，和DeviceBaseFeature架构对齐
 # 提供物料转移功能
 # -----------------------------------------------------------------------------
-class TransferFeature(sila.Feature):
+class CLAMPFeature(sila.Feature):
     def __init__(self, uds: UdsClient):
         super().__init__(
-            identifier="Transfer",
-            name="转移模块",
+            identifier="CLAMP",
+            name="CLAMP",
             category="application",
             version="1.0",
             description="提供物料转移功能",
         )
-        logger.info("🟢 TransferFeature initialized, UDS injected")
+        logger.info("🟢 CLAMPFeature initialized, UDS injected")
         self.uds: UdsClient = uds
         self._connected: bool = False
 
@@ -41,10 +41,10 @@ class TransferFeature(sila.Feature):
     async def _ensure_conn(self):
         """懒连接，第一次命令调用才建立UDS连接"""
         if not self._connected:
-            logger.info("TransferFeature: 正在建立UDS连接 ...")
+            logger.info("CLAMPFeature: 正在建立UDS连接 ...")
             await self.uds.connect()
             self._connected = True
-            logger.info("✅ TransferFeature UDS连接完成")
+            logger.info("✅ CLAMPFeature UDS连接完成")
 
     # ------------------------------
     # Commands
@@ -90,7 +90,7 @@ class TransferFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发转移指令至下位机")
 
-            resp = await uds.send_request(cmd="Transfer.TransferItem", params=req_params)
+            resp = await uds.send_request(cmd="CLAMP.TransferItem", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)

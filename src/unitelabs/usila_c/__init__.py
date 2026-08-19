@@ -5,13 +5,13 @@ from importlib.metadata import version
 
 from unitelabs.cdk import Connector, ConnectorBaseConfig, SiLAServerConfig
 
-from unitelabs.usila_c.feature.balance import BalanceFeature
-from unitelabs.usila_c.feature.deviceBase import DeviceBaseFeature
-from unitelabs.usila_c.feature.lidHandling import LidHandlingFeature
-from unitelabs.usila_c.feature.liquidHandling import LiquidHandlingFeature
-from unitelabs.usila_c.feature.powderDosing import PowderDosingFeature
-from unitelabs.usila_c.feature.transfer import TransferFeature
-from unitelabs.usila_c.feature.vortex import VortexFeature
+from unitelabs.usila_c.feature.capHandle import CAPFeature
+from unitelabs.usila_c.feature.clampHandle import CLAMPFeature
+from unitelabs.usila_c.feature.devicebase import DeviceBaseFeature
+from unitelabs.usila_c.feature.ffqHandle import FFQFeature
+from unitelabs.usila_c.feature.lidHandle import LIDFeature
+from unitelabs.usila_c.feature.wsHandle import WSFeature
+from unitelabs.usila_c.feature.zdHandle import ZDFeature
 from unitelabs.usila_c.socket_client import UdsClient
 
 __version__ = version("unitelabs-pro-c")
@@ -47,25 +47,25 @@ async def create_app(config: ProCConfig) -> collections.abc.AsyncGenerator[Conne
 
     # =========手动实例化Feature，把UDS客户端注入进去=========
     try:
-        balance_feat = BalanceFeature(uds=SHARED_UDS)
+        balance_feat = WSFeature(uds=SHARED_UDS)
         app.register(balance_feat)
 
         deviceBase_feat = DeviceBaseFeature(uds=SHARED_UDS)
         app.register(deviceBase_feat)
 
-        powderDosing_feat = PowderDosingFeature(uds=SHARED_UDS)
+        powderDosing_feat = FFQFeature(uds=SHARED_UDS)
         app.register(powderDosing_feat)
 
-        liquidHandling_feat = LiquidHandlingFeature(uds=SHARED_UDS)
+        liquidHandling_feat = LIDFeature(uds=SHARED_UDS)
         app.register(liquidHandling_feat)
 
-        lidHandling_feat = LidHandlingFeature(uds=SHARED_UDS)
-        app.register(lidHandling_feat)
+        cap_feat = CAPFeature(uds=SHARED_UDS)
+        app.register(cap_feat)
 
-        transfer_feat = TransferFeature(uds=SHARED_UDS)
+        transfer_feat = CLAMPFeature(uds=SHARED_UDS)
         app.register(transfer_feat)
 
-        vortex_feat = VortexFeature(uds=SHARED_UDS)
+        vortex_feat = ZDFeature(uds=SHARED_UDS)
         app.register(vortex_feat)
 
     except ValueError:
