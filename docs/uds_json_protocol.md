@@ -25,7 +25,7 @@ self.writer.write(payload.encode("utf-8"))
 
 ### 1.1 字段说明
 
-- `cmd`: 命令名，格式为 `模块名.方法名`，如 `DeviceBase.Initialize`，`LiquidHandling.Aspirate`
+- `cmd`: 命令名，格式为 `模块名.方法名`，如 `DeviceBase.Initialize`，`LID.Aspirate`
 - `params`: 命令参数对象，按具体功能不同而变化
 - `req_id`: 每次请求生成的 UUID，用于匹配请求与响应
 
@@ -262,25 +262,66 @@ if resp["req_id"] != req_id:
 resp["result"]["status"]
 ```
 
----
+`DeviceBase` 还会通过以下可观察属性轮询设备状态。它们的请求均使用空参数，返回值从 `result` 中读取：
 
-### 4.2 Balance
+| 属性 | 请求命令 | 返回字段 | 类型 |
+| --- | --- | --- | --- |
+| `DeviceState` | `DeviceBase.GetDeviceState` | `status` | `int` |
+| `FaultReason` | `DeviceBase.GetFaultReason` | `fault_reason` | `str` |
+| `XPosition` | `DeviceBase.GetXPos` | `logic` | `float` |
+| `XMotorPosition` | `DeviceBase.GetXPos` | `motor` | `float` |
+| `YPosition` | `DeviceBase.GetYPos` | `logic` | `float` |
+| `YMotorPosition` | `DeviceBase.GetYPos` | `motor` | `float` |
+| `PowderZPosition` | `DeviceBase.GetPowderZPos` | `logic` | `float` |
+| `PowderZMotorPosition` | `DeviceBase.GetPowderZPos` | `motor` | `float` |
+| `GripperZPosition` | `DeviceBase.GetGripperZPos` | `logic` | `float` |
+| `GripperZMotorPosition` | `DeviceBase.GetGripperZPos` | `motor` | `float` |
+| `LiquidZPosition` | `DeviceBase.GetLiquidZPos` | `logic` | `float` |
+| `LiquidZMotorPosition` | `DeviceBase.GetLiquidZPos` | `motor` | `float` |
+| `GripperForce` | `DeviceBase.GetGripperState` | `force` | `float` |
+| `GripperPosition` | `DeviceBase.GetGripperState` | `position` | `float` |
 
-#### `Balance.Tare`
+例如，获取夹爪状态的请求和返回如下：
 
 ```json
 {
-  "cmd": "Balance.Tare",
+  "cmd": "DeviceBase.GetGripperState",
   "params": {},
   "req_id": "..."
 }
 ```
 
-#### `Balance.GetGrossWeight`
+```json
+{
+  "req_id": "...",
+  "code": 0,
+  "msg": "success",
+  "result": {
+    "force": 12.5,
+    "position": 15.0
+  }
+}
+```
+
+---
+
+### 4.2 WS（天平）
+
+#### `WS.Tare`
 
 ```json
 {
-  "cmd": "Balance.GetGrossWeight",
+  "cmd": "WS.Tare",
+  "params": {},
+  "req_id": "..."
+}
+```
+
+#### `WS.GetGrossWeight`
+
+```json
+{
+  "cmd": "WS.GetGrossWeight",
   "params": {},
   "req_id": "..."
 }
@@ -341,13 +382,13 @@ resp["result"]["status"]
 
 ---
 
-### 4.4 LiquidHandling
+### 4.4 LID（移液器）
 
-#### `LiquidHandling.AttachTip`
+#### `LID.AttachTip`
 
 ```json
 {
-  "cmd": "LiquidHandling.AttachTip",
+  "cmd": "LID.AttachTip",
   "params": {
     "tip_position": {"x": 10.0, "y": 20.0, "z": 30.0},
     "press_force": 12.5
@@ -356,11 +397,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `LiquidHandling.Aspirate`
+#### `LID.Aspirate`
 
 ```json
 {
-  "cmd": "LiquidHandling.Aspirate",
+  "cmd": "LID.Aspirate",
   "params": {
     "target_position": {"x": 10.0, "y": 20.0, "z": 30.0},
     "volume": 150.0,
@@ -371,11 +412,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `LiquidHandling.Dispense`
+#### `LID.Dispense`
 
 ```json
 {
-  "cmd": "LiquidHandling.Dispense",
+  "cmd": "LID.Dispense",
   "params": {
     "target_position": {"x": 10.0, "y": 20.0, "z": 30.0},
     "volume": 150.0,
@@ -386,11 +427,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `LiquidHandling.EjectTip`
+#### `LID.EjectTip`
 
 ```json
 {
-  "cmd": "LiquidHandling.EjectTip",
+  "cmd": "LID.EjectTip",
   "params": {
     "eject_position": {"x": 10.0, "y": 20.0, "z": 30.0},
     "eject_force": 12.5
@@ -401,13 +442,13 @@ resp["result"]["status"]
 
 ---
 
-### 4.5 PowderDosing
+### 4.5 FFQ（粉体处理）
 
-#### `PowderDosing.LoadPowderBucket`
+#### `FFQ.LoadPowderBucket`
 
 ```json
 {
-  "cmd": "PowderDosing.LoadPowderBucket",
+  "cmd": "FFQ.LoadPowderBucket",
   "params": {
     "load_position": {"x": 10.0, "y": 20.0, "z": 30.0}
   },
@@ -415,11 +456,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `PowderDosing.UnloadPowderBucket`
+#### `FFQ.UnloadPowderBucket`
 
 ```json
 {
-  "cmd": "PowderDosing.UnloadPowderBucket",
+  "cmd": "FFQ.UnloadPowderBucket",
   "params": {
     "unload_position": {"x": 10.0, "y": 20.0, "z": 30.0}
   },
@@ -427,11 +468,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `PowderDosing.PickPowder`
+#### `FFQ.PickPowder`
 
 ```json
 {
-  "cmd": "PowderDosing.PickPowder",
+  "cmd": "FFQ.PickPowder",
   "params": {
     "target_x": 100.0,
     "target_y": 120.0,
@@ -443,11 +484,11 @@ resp["result"]["status"]
 }
 ```
 
-#### `PowderDosing.DispensePowder`
+#### `FFQ.DispensePowder`
 
 ```json
 {
-  "cmd": "PowderDosing.DispensePowder",
+  "cmd": "FFQ.DispensePowder",
   "params": {
     "target_position": {"x": 10.0, "y": 20.0, "z": 30.0}
   },
@@ -457,13 +498,13 @@ resp["result"]["status"]
 
 ---
 
-### 4.6 Transfer
+### 4.6 CLAMP（物料转移）
 
-#### `Transfer.TransferItem`
+#### `CLAMP.TransferItem`
 
 ```json
 {
-  "cmd": "Transfer.TransferItem",
+  "cmd": "CLAMP.TransferItem",
   "params": {
     "source_position": {"x": 10.0, "y": 20.0, "z": 30.0},
     "target_position": {"x": 40.0, "y": 50.0, "z": 60.0},
@@ -476,13 +517,13 @@ resp["result"]["status"]
 
 ---
 
-### 4.7 Vortex
+### 4.7 ZD（振荡）
 
-#### `Vortex.StartVortex`
+#### `ZD.StartVortex`
 
 ```json
 {
-  "cmd": "Vortex.StartVortex",
+  "cmd": "ZD.StartVortex",
   "params": {
     "duration": 5000.0
   },
@@ -528,12 +569,12 @@ resp["result"]["status"]
 ## 6. 实际代码来源
 
 - [src/unitelabs/usila_c/socket_client.py](../src/unitelabs/usila_c/socket_client.py)
-- [src/unitelabs/usila_c/feature/deviceBase.py](../src/unitelabs/usila_c/feature/deviceBase.py)
-- [src/unitelabs/usila_c/feature/balance.py](../src/unitelabs/usila_c/feature/balance.py)
-- [src/unitelabs/usila_c/feature/cap.py](../src/unitelabs/usila_c/feature/cap.py)
-- [src/unitelabs/usila_c/feature/liquidHandling.py](../src/unitelabs/usila_c/feature/liquidHandling.py)
-- [src/unitelabs/usila_c/feature/powderDosing.py](../src/unitelabs/usila_c/feature/powderDosing.py)
-- [src/unitelabs/usila_c/feature/transfer.py](../src/unitelabs/usila_c/feature/transfer.py)
-- [src/unitelabs/usila_c/feature/vortex.py](../src/unitelabs/usila_c/feature/vortex.py)
+- [src/unitelabs/usila_c/feature/devicebase.py](../src/unitelabs/usila_c/feature/devicebase.py)
+- [src/unitelabs/usila_c/feature/wsHandle.py](../src/unitelabs/usila_c/feature/wsHandle.py)
+- [src/unitelabs/usila_c/feature/capHandle.py](../src/unitelabs/usila_c/feature/capHandle.py)
+- [src/unitelabs/usila_c/feature/lidHandle.py](../src/unitelabs/usila_c/feature/lidHandle.py)
+- [src/unitelabs/usila_c/feature/ffqHandle.py](../src/unitelabs/usila_c/feature/ffqHandle.py)
+- [src/unitelabs/usila_c/feature/clampHandle.py](../src/unitelabs/usila_c/feature/clampHandle.py)
+- [src/unitelabs/usila_c/feature/zdHandle.py](../src/unitelabs/usila_c/feature/zdHandle.py)
 
 如果需要下一步，我也可以继续把这份文档改成更适合对接 C++/下位机的“接口规范版”，例如补充字段类型表、命令编号表和错误码枚举。 

@@ -49,7 +49,7 @@ class CLAMPFeature(sila.Feature):
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="TransferItem", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="move_serial", errors=[DeviceCommandError])
     async def TransferItem(
         self,
         *,
@@ -90,14 +90,14 @@ class CLAMPFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发转移指令至下位机")
 
-            resp = await uds.send_request(cmd="TransferItem", params=req_params)
+            resp = await uds.send_request(cmd="move_serial", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "TransferItem command failed")
-                raise DeviceCommandError(f"TransferItem fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "move_serial command failed")
+                raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("物料转移完成")

@@ -49,7 +49,7 @@ class CAPFeature(sila.Feature):
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="OpenCap", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="rotate_open", errors=[DeviceCommandError])
     async def OpenCap(
         self,
         *,
@@ -108,14 +108,14 @@ class CAPFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发开盖指令至下位机")
 
-            resp = await uds.send_request(cmd="OpenCap", params=req_params)
+            resp = await uds.send_request(cmd="rotate_open", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "OpenCap command failed")
-                raise DeviceCommandError(f"OpenCap fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "rotate_open command failed")
+                raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("开盖完成")
@@ -143,7 +143,7 @@ class CAPFeature(sila.Feature):
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
-    @sila.ObservableCommand(name="CloseCap", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="rotate_close", errors=[DeviceCommandError])
     async def CloseCap(
         self,
         *,
@@ -187,14 +187,14 @@ class CAPFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发关盖指令至下位机")
 
-            resp = await uds.send_request(cmd="CloseCap", params=req_params)
+            resp = await uds.send_request(cmd="rotate_close", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "CloseCap command failed")
-                raise DeviceCommandError(f"CloseCap fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "rotate_close command failed")
+                raise DeviceCommandError(f"rotate_close fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("关盖完成")

@@ -71,14 +71,14 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="LoadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="load_bucket", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "LoadPowderBucket command failed")
-                raise DeviceCommandError(f"LoadPowderBucket fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "load_bucket command failed")
+                raise DeviceCommandError(f"load_bucket fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("粉桶装载完成")
@@ -129,14 +129,14 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="UnloadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="unload_bucket_1", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "UnloadPowderBucket command failed")
-                raise DeviceCommandError(f"UnloadPowderBucket fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "unload_bucket_1 command failed")
+                raise DeviceCommandError(f"unload_bucket_1 fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("粉桶卸载完成")
@@ -205,14 +205,14 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.4)
             intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="PickPowder", params=req_params)
+            resp = await uds.send_request(cmd="take_powder", params=req_params)
 
             status.update(progress=0.85)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "PickPowder command failed")
-                raise DeviceCommandError(f"PickPowder fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "take_powder command failed")
+                raise DeviceCommandError(f"take_powder fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("取粉完成")
@@ -265,14 +265,14 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="DispensePowder", params=req_params)
+            resp = await uds.send_request(cmd="spit_powder_1", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "DispensePowder command failed")
-                raise DeviceCommandError(f"DispensePowder fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "spit_powder_1 command failed")
+                raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
 
             status.update(progress=1.0)
             intermediate.send("吐粉完成")

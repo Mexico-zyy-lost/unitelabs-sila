@@ -4,6 +4,7 @@ import traceback
 from importlib.metadata import version
 
 from unitelabs.cdk import Connector, ConnectorBaseConfig, SiLAServerConfig
+from unitelabs.usila_c.authentication_service import AuthenticationService
 
 from unitelabs.usila_c.feature.capHandle import CAPFeature
 from unitelabs.usila_c.feature.clampHandle import CLAMPFeature
@@ -47,6 +48,8 @@ async def create_app(config: ProCConfig) -> collections.abc.AsyncGenerator[Conne
 
     # =========手动实例化Feature，把UDS客户端注入进去=========
     try:
+        app.register(AuthenticationService())
+
         balance_feat = WSFeature(uds=SHARED_UDS)
         app.register(balance_feat)
 
