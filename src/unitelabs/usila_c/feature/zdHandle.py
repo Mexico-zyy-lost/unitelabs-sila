@@ -68,7 +68,7 @@ class ZDFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发振荡指令至下位机")
 
-            resp = await uds.send_request(cmd="ZD.StartVortex", params=req_params)
+            resp = await uds.send_request(cmd="StartVortex", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

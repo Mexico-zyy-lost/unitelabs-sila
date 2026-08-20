@@ -75,7 +75,7 @@ class LIDFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发安装指令至下位机")
 
-            resp = await uds.send_request(cmd="LID.AttachTip", params=req_params)
+            resp = await uds.send_request(cmd="AttachTip", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -152,7 +152,7 @@ class LIDFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发吸液指令至下位机")
 
-            resp = await uds.send_request(cmd="LID.Aspirate", params=req_params)
+            resp = await uds.send_request(cmd="Aspirate", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
@@ -230,7 +230,7 @@ class LIDFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发排液指令至下位机")
 
-            resp = await uds.send_request(cmd="LID.Dispense", params=req_params)
+            resp = await uds.send_request(cmd="Dispense", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
@@ -299,7 +299,7 @@ class LIDFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发退Tip指令至下位机")
 
-            resp = await uds.send_request(cmd="LID.EjectTip", params=req_params)
+            resp = await uds.send_request(cmd="EjectTip", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

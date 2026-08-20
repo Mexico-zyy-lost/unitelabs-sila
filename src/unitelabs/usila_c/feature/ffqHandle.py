@@ -71,7 +71,7 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="FFQ.LoadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="LoadPowderBucket", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -129,7 +129,7 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="FFQ.UnloadPowderBucket", params=req_params)
+            resp = await uds.send_request(cmd="UnloadPowderBucket", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)
@@ -205,7 +205,7 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.4)
             intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="FFQ.PickPowder", params=req_params)
+            resp = await uds.send_request(cmd="PickPowder", params=req_params)
 
             status.update(progress=0.85)
             ret_code = resp.get("code", -1)
@@ -265,7 +265,7 @@ class FFQFeature(sila.Feature):
             status.update(progress=0.5)
             intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="FFQ.DispensePowder", params=req_params)
+            resp = await uds.send_request(cmd="DispensePowder", params=req_params)
 
             status.update(progress=0.9)
             ret_code = resp.get("code", -1)

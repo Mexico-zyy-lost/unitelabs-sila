@@ -47,7 +47,7 @@ class WSFeature(sila.Feature):
     @sila.UnobservableCommand()
     async def Tare(self) -> None:
         uds = await self._get_uds()
-        resp = await uds.send_request(cmd="WS.Tare", params={})
+        resp = await uds.send_request(cmd="Tare", params={})
         ret_code = resp.get("code", -1)
         if ret_code != 0:
             err_msg = resp.get("msg", "tare command failed")
@@ -58,7 +58,7 @@ class WSFeature(sila.Feature):
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="WS.GetGrossWeight", params={})
+                resp = await uds.send_request(cmd="GetGrossWeight", params={})
                 yield float(resp["result"]["weight_g"])
             except Exception as e:
                 print(f"读取天平异常 {e}")

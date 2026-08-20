@@ -90,7 +90,7 @@ class CLAMPFeature(sila.Feature):
             status.update(progress=0.7)
             intermediate.send("下发转移指令至下位机")
 
-            resp = await uds.send_request(cmd="CLAMP.TransferItem", params=req_params)
+            resp = await uds.send_request(cmd="TransferItem", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)

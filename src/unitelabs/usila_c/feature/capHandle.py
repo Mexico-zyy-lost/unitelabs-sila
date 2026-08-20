@@ -108,7 +108,7 @@ class CAPFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发开盖指令至下位机")
 
-            resp = await uds.send_request(cmd="CAP.OpenCap", params=req_params)
+            resp = await uds.send_request(cmd="OpenCap", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
@@ -187,7 +187,7 @@ class CAPFeature(sila.Feature):
             status.update(progress=0.8)
             intermediate.send("下发关盖指令至下位机")
 
-            resp = await uds.send_request(cmd="CAP.CloseCap", params=req_params)
+            resp = await uds.send_request(cmd="CloseCap", params=req_params)
 
             status.update(progress=0.95)
             ret_code = resp.get("code", -1)
