@@ -62,7 +62,7 @@ class LIDFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-           intermediate.send("开始安装Tip头")
+            intermediate.send("开始安装Tip头")
 
             uds = await self._get_uds()
 
@@ -71,18 +71,18 @@ class LIDFeature(sila.Feature):
                 "press_force": press_force,
             }
 
-           intermediate.send("下发安装指令至下位机")
+            intermediate.send("下发安装指令至下位机")
 
-           resp = await uds.send_and_stream(cmd="AttachTip", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
+            resp = await uds.send_request(cmd="AttachTip", params=req_params)
+            ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "AttachTip command failed")
                raise DeviceCommandError(f"AttachTip fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("Tip头安装完成")
+            intermediate.send("Tip头安装完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="Tip头安装完成",
                data={
@@ -91,18 +91,18 @@ class LIDFeature(sila.Feature):
                    "tip_position_z": str(tip_position.z),
                    "press_force": str(press_force),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"Tip头安装失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"Tip头安装失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("AttachTip exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("AttachTip exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="Aspirate", errors=[DeviceCommandError])
     async def Aspirate(
@@ -127,7 +127,7 @@ class LIDFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-           intermediate.send("开始吸液")
+            intermediate.send("开始吸液")
 
             uds = await self._get_uds()
 
@@ -138,19 +138,19 @@ class LIDFeature(sila.Feature):
                 "immersion_depth": immersion_depth,
             }
 
-           intermediate.send("针头下降中...")
-           intermediate.send("下发吸液指令至下位机")
+            intermediate.send("针头下降中...")
+            intermediate.send("下发吸液指令至下位机")
 
-           resp = await uds.send_and_stream(cmd="Aspirate", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
+            resp = await uds.send_request(cmd="Aspirate", params=req_params)
+            ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "Aspirate command failed")
                raise DeviceCommandError(f"Aspirate fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("吸液完成")
+            intermediate.send("吸液完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="吸液完成",
                data={
@@ -160,18 +160,18 @@ class LIDFeature(sila.Feature):
                    "volume": str(volume),
                    "aspirate_speed": str(aspirate_speed),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"吸液失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"吸液失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("Aspirate exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("Aspirate exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="Dispense", errors=[DeviceCommandError])
     async def Dispense(
@@ -196,7 +196,7 @@ class LIDFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-           intermediate.send("开始排液")
+            intermediate.send("开始排液")
 
             uds = await self._get_uds()
 
@@ -207,19 +207,19 @@ class LIDFeature(sila.Feature):
                 "immersion_depth": immersion_depth,
             }
 
-           intermediate.send("针头下降中...")
-           intermediate.send("下发排液指令至下位机")
+            intermediate.send("针头下降中...")
+            intermediate.send("下发排液指令至下位机")
 
-           resp = await uds.send_and_stream(cmd="Dispense", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
+            resp = await uds.send_request(cmd="Dispense", params=req_params)
+            ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "Dispense command failed")
                raise DeviceCommandError(f"Dispense fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("排液完成")
+            intermediate.send("排液完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="排液完成",
                data={
@@ -229,18 +229,18 @@ class LIDFeature(sila.Feature):
                    "volume": str(volume),
                    "dispense_speed": str(dispense_speed),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"排液失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"排液失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("Dispense exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("Dispense exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="EjectTip", errors=[DeviceCommandError])
     async def EjectTip(
@@ -261,7 +261,7 @@ class LIDFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-           intermediate.send("开始退Tip头")
+            intermediate.send("开始退Tip头")
 
             uds = await self._get_uds()
 
@@ -270,18 +270,18 @@ class LIDFeature(sila.Feature):
                 "eject_force": eject_force,
             }
 
-           intermediate.send("下发退Tip指令至下位机")
+            intermediate.send("下发退Tip指令至下位机")
 
-           resp = await uds.send_and_stream(cmd="EjectTip", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
+            resp = await uds.send_request(cmd="EjectTip", params=req_params)
+            ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "EjectTip command failed")
                raise DeviceCommandError(f"EjectTip fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("Tip头退出完成")
+            intermediate.send("Tip头退出完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="Tip头退出完成",
                data={
@@ -290,15 +290,15 @@ class LIDFeature(sila.Feature):
                    "eject_position_z": str(eject_position.z),
                    "eject_force": str(eject_force),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"Tip头退出失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"Tip头退出失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("EjectTip exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("EjectTip exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})

@@ -72,7 +72,7 @@ class CLAMPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-           intermediate.send("开始物料转移")
+            intermediate.send("开始物料转移")
 
             uds = await self._get_uds()
 
@@ -83,19 +83,19 @@ class CLAMPFeature(sila.Feature):
                 "release_after_finish": release_after_finish,
             }
 
-           intermediate.send("取料中...")
-           intermediate.send("下发转移指令至下位机")
+            intermediate.send("取料中...")
+            intermediate.send("下发转移指令至下位机")
 
-           resp = await uds.send_and_stream(cmd="move_serial", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
+            resp = await uds.send_request(cmd="move_serial", params=req_params)
+            ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "move_serial command failed")
                raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("物料转移完成")
+            intermediate.send("物料转移完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="物料转移完成",
                data={
@@ -107,15 +107,15 @@ class CLAMPFeature(sila.Feature):
                    "target_z": str(target_position.z),
                    "release_after_finish": str(release_after_finish),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"转移失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"转移失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("TransferItem exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("TransferItem exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})

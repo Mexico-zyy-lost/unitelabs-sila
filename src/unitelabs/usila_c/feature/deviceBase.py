@@ -315,26 +315,26 @@ class DeviceBaseFeature(sila.Feature):
             DeviceCommandError: 设备底层初始化命令执行失败
         """
         try:
-           intermediate.send("开始执行设备初始化")
+            intermediate.send("开始执行设备初始化")
 
             uds = await self._get_uds()
-            resp = await uds.send_and_stream(cmd="Initialize", params={}, status=status, intermediate=intermediate)
+            resp = await uds.send_request(cmd="Initialize", params={})
             ret_code = resp.get("code", -1)
 
-           if ret_code != 0:
+            if ret_code != 0:
                err_msg = resp.get("msg", "initialize command failed")
                raise DeviceCommandError(f"Initialize fail, code={ret_code}, msg={err_msg}")
 
-           intermediate.send("初始化完成")
+            intermediate.send("初始化完成")
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           # 抛出SiLA标准业务异常，由CDK框架向外输出错误
-           raise e
+            # 抛出SiLA标准业务异常，由CDK框架向外输出错误
+            raise e
        except Exception as e:
-           logger.exception("Initialize exception")
-           raise DeviceCommandError(f"通信异常:{e!s}") from e
+            logger.exception("Initialize exception")
+            raise DeviceCommandError(f"通信异常:{e!s}") from e
 
     @sila.UnobservableCommand(name="EmergencyStop")
     async def EmergencyStop(self) -> CommandResult:
@@ -410,7 +410,7 @@ class DeviceBaseFeature(sila.Feature):
     ) -> CommandResult:
         """对3个Z轴分别进行坐标系‑电机坐标映射标定，每轴取3对映射点"""
         try:
-           intermediate.send("开始坐标标定")
+            intermediate.send("开始坐标标定")
 
             uds = await self._get_uds()
 
@@ -427,18 +427,18 @@ class DeviceBaseFeature(sila.Feature):
                 "liquid_z_calibration": [_cal_pair_to_dict(it) for it in liquid_z_calibration],
             }
 
-           intermediate.send("下发标定参数至下位机")
+            intermediate.send("下发标定参数至下位机")
 
-           resp = await uds.send_and_stream(cmd="CoordinateCalibration", params=req_params, status=status, intermediate=intermediate)
-           ret_code = resp.get("code", -1)
-           if ret_code != 0:
+            resp = await uds.send_request(cmd="CoordinateCalibration", params=req_params)
+            ret_code = resp.get("code", -1)
+            if ret_code != 0:
                err_msg = resp.get("msg", "CoordinateCalibration failed")
                raise DeviceCommandError(f"CoordinateCalibration fail, code={ret_code}, msg={err_msg}")
 
-           res_data = resp.get("result", {})
-           intermediate.send("坐标标定完成")
+            res_data = resp.get("result", {})
+            intermediate.send("坐标标定完成")
 
-           return CommandResult.from_dict(
+            return CommandResult.from_dict(
                success=True,
                message="坐标标定完成",
                data={
@@ -447,15 +447,15 @@ class DeviceBaseFeature(sila.Feature):
                    "liquid_z_residual": str(res_data.get("liquid_z_residual", "")),
                    "calibration_timestamp": str(res_data.get("calibration_timestamp", "")),
                },
-           )
+            )
 
        except asyncio.CancelledError:
-           raise
+            raise
        except DeviceCommandError as e:
-           intermediate.send(f"标定失败:{e!s}")
-           return CommandResult.from_dict(False, str(e), {})
+            intermediate.send(f"标定失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
        except Exception as e:
-           logger.exception("CoordinateCalibration exception")
-           err_msg = f"通信异常:{e!s}"
-           intermediate.send(err_msg)
-           return CommandResult.from_dict(False, err_msg, {})
+            logger.exception("CoordinateCalibration exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})

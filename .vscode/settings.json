@@ -39,5 +39,7 @@
   // toml extension configuration
   "evenBetterToml.formatter.arrayAutoCollapse": false,
   "evenBetterToml.formatter.columnWidth": 75,
-  "evenBetterToml.formatter.indentString": "    "
+  "evenBetterToml.formatter.indentString": "    ",
+  "cursorpyright.analysis.autoImportCompletions": true,
+  "cursorpyright.analysis.typeCheckingMode": "basic"
 }
