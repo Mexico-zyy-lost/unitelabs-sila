@@ -82,8 +82,7 @@ class CAPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始开盖")
+           intermediate.send("开始开盖")
 
             uds = await self._get_uds()
 
@@ -99,49 +98,39 @@ class CAPFeature(sila.Feature):
                 "z_lift_height": z_lift_height,
             }
 
-            status.update(progress=0.3)
-            intermediate.send("夹紧容器")
+           intermediate.send("夹紧容器")
+           intermediate.send("旋转开盖中...")
+           intermediate.send("下发开盖指令至下位机")
 
-            status.update(progress=0.6)
-            intermediate.send("旋转开盖中...")
+           resp = await uds.send_and_stream(cmd="rotate_open", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.8)
-            intermediate.send("下发开盖指令至下位机")
+           if ret_code != 0:
+               err_msg = resp.get("msg", "rotate_open command failed")
+               raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
 
-            resp = await uds.send_request(cmd="rotate_open", params=req_params)
+           intermediate.send("开盖完成")
 
-            status.update(progress=0.95)
-            ret_code = resp.get("code", -1)
+           return CommandResult.from_dict(
+               success=True,
+               message="开盖完成",
+               data={
+                   "container_diameter": str(container_diameter),
+                   "rotation_cycles": str(rotation_cycles),
+                   "rotation_speed": str(rotation_speed),
+               },
+           )
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "rotate_open command failed")
-                raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
-
-            status.update(progress=1.0)
-            intermediate.send("开盖完成")
-
-            return CommandResult.from_dict(
-                success=True,
-                message="开盖完成",
-                data={
-                    "container_diameter": str(container_diameter),
-                    "rotation_cycles": str(rotation_cycles),
-                    "rotation_speed": str(rotation_speed),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"开盖失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("OpenCap exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"开盖失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("OpenCap exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="rotate_close", errors=[DeviceCommandError])
     async def CloseCap(
@@ -168,8 +157,7 @@ class CAPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始关盖")
+           intermediate.send("开始关盖")
 
             uds = await self._get_uds()
 
@@ -181,42 +169,34 @@ class CAPFeature(sila.Feature):
                 "z_lift_height": z_lift_height,
             }
 
-            status.update(progress=0.4)
-            intermediate.send("旋转关盖中...")
+           intermediate.send("旋转关盖中...")
+           intermediate.send("下发关盖指令至下位机")
 
-            status.update(progress=0.8)
-            intermediate.send("下发关盖指令至下位机")
+           resp = await uds.send_and_stream(cmd="rotate_close", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            resp = await uds.send_request(cmd="rotate_close", params=req_params)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "rotate_close command failed")
+               raise DeviceCommandError(f"rotate_close fail, code={ret_code}, msg={err_msg}")
 
-            status.update(progress=0.95)
-            ret_code = resp.get("code", -1)
+           intermediate.send("关盖完成")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "rotate_close command failed")
-                raise DeviceCommandError(f"rotate_close fail, code={ret_code}, msg={err_msg}")
+           return CommandResult.from_dict(
+               success=True,
+               message="关盖完成",
+               data={
+                   "rotation_cycles": str(rotation_cycles),
+                   "rotation_speed": str(rotation_speed),
+               },
+           )
 
-            status.update(progress=1.0)
-            intermediate.send("关盖完成")
-
-            return CommandResult.from_dict(
-                success=True,
-                message="关盖完成",
-                data={
-                    "rotation_cycles": str(rotation_cycles),
-                    "rotation_speed": str(rotation_speed),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"关盖失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("CloseCap exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"关盖失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("CloseCap exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})

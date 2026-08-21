@@ -61,50 +61,43 @@ class FFQFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始装载粉桶")
+           intermediate.send("开始装载粉桶")
 
             uds = await self._get_uds()
 
             req_params = {"load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z}}
 
-            status.update(progress=0.5)
-            intermediate.send("下发装载指令至下位机")
+           intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="load_bucket", params=req_params)
+           resp = await uds.send_and_stream(cmd="load_bucket", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.9)
-            ret_code = resp.get("code", -1)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "load_bucket command failed")
+               raise DeviceCommandError(f"load_bucket fail, code={ret_code}, msg={err_msg}")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "load_bucket command failed")
-                raise DeviceCommandError(f"load_bucket fail, code={ret_code}, msg={err_msg}")
+           intermediate.send("粉桶装载完成")
 
-            status.update(progress=1.0)
-            intermediate.send("粉桶装载完成")
+           return CommandResult.from_dict(
+               success=True,
+               message="粉桶装载完成",
+               data={
+                   "load_position_x": str(load_position.x),
+                   "load_position_y": str(load_position.y),
+                   "load_position_z": str(load_position.z),
+               },
+           )
 
-            return CommandResult.from_dict(
-                success=True,
-                message="粉桶装载完成",
-                data={
-                    "load_position_x": str(load_position.x),
-                    "load_position_y": str(load_position.y),
-                    "load_position_z": str(load_position.z),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"装载失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("LoadPowderBucket exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"装载失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("LoadPowderBucket exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="UnloadPowderBucket", errors=[DeviceCommandError])
     async def UnloadPowderBucket(
@@ -119,50 +112,43 @@ class FFQFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始卸载粉桶")
+           intermediate.send("开始卸载粉桶")
 
             uds = await self._get_uds()
 
             req_params = {"unload_position": {"x": unload_position.x, "y": unload_position.y, "z": unload_position.z}}
 
-            status.update(progress=0.5)
-            intermediate.send("下发卸载指令至下位机")
+           intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="unload_bucket_1", params=req_params)
+           resp = await uds.send_and_stream(cmd="unload_bucket_1", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.9)
-            ret_code = resp.get("code", -1)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "unload_bucket_1 command failed")
+               raise DeviceCommandError(f"unload_bucket_1 fail, code={ret_code}, msg={err_msg}")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "unload_bucket_1 command failed")
-                raise DeviceCommandError(f"unload_bucket_1 fail, code={ret_code}, msg={err_msg}")
+           intermediate.send("粉桶卸载完成")
 
-            status.update(progress=1.0)
-            intermediate.send("粉桶卸载完成")
+           return CommandResult.from_dict(
+               success=True,
+               message="粉桶卸载完成",
+               data={
+                   "unload_position_x": str(unload_position.x),
+                   "unload_position_y": str(unload_position.y),
+                   "unload_position_z": str(unload_position.z),
+               },
+           )
 
-            return CommandResult.from_dict(
-                success=True,
-                message="粉桶卸载完成",
-                data={
-                    "unload_position_x": str(unload_position.x),
-                    "unload_position_y": str(unload_position.y),
-                    "unload_position_z": str(unload_position.z),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"卸载失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("UnloadPowderBucket exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"卸载失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("UnloadPowderBucket exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="PickPowder", errors=[DeviceCommandError])
     async def PickPowder(
@@ -189,8 +175,7 @@ class FFQFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始取粉")
+           intermediate.send("开始取粉")
 
             uds = await self._get_uds()
 
@@ -202,45 +187,39 @@ class FFQFeature(sila.Feature):
                 "compact_depth": compact_depth,
             }
 
-            status.update(progress=0.4)
-            intermediate.send("下发取粉指令至下位机")
+           intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="take_powder", params=req_params)
+           resp = await uds.send_and_stream(cmd="take_powder", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.85)
-            ret_code = resp.get("code", -1)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "take_powder command failed")
+               raise DeviceCommandError(f"take_powder fail, code={ret_code}, msg={err_msg}")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "take_powder command failed")
-                raise DeviceCommandError(f"take_powder fail, code={ret_code}, msg={err_msg}")
+           intermediate.send("取粉完成")
 
-            status.update(progress=1.0)
-            intermediate.send("取粉完成")
+           return CommandResult.from_dict(
+               success=True,
+               message="取粉完成",
+               data={
+                   "target_x": str(target_x),
+                   "target_y": str(target_y),
+                   "powder_surface_z": str(powder_surface_z),
+                   "pick_depth": str(pick_depth),
+                   "compact_depth": str(compact_depth),
+               },
+           )
 
-            return CommandResult.from_dict(
-                success=True,
-                message="取粉完成",
-                data={
-                    "target_x": str(target_x),
-                    "target_y": str(target_y),
-                    "powder_surface_z": str(powder_surface_z),
-                    "pick_depth": str(pick_depth),
-                    "compact_depth": str(compact_depth),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"取粉失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("PickPowder exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"取粉失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("PickPowder exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableCommand(name="DispensePowder", errors=[DeviceCommandError])
     async def DispensePowder(
@@ -255,47 +234,40 @@ class FFQFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始吐粉")
+           intermediate.send("开始吐粉")
 
             uds = await self._get_uds()
 
             req_params = {"target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z}}
 
-            status.update(progress=0.5)
-            intermediate.send("下发吐粉指令至下位机")
+           intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="spit_powder_1", params=req_params)
+           resp = await uds.send_and_stream(cmd="spit_powder_1", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.9)
-            ret_code = resp.get("code", -1)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "spit_powder_1 command failed")
+               raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "spit_powder_1 command failed")
-                raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
+           intermediate.send("吐粉完成")
 
-            status.update(progress=1.0)
-            intermediate.send("吐粉完成")
+           return CommandResult.from_dict(
+               success=True,
+               message="吐粉完成",
+               data={
+                   "target_position_x": str(target_position.x),
+                   "target_position_y": str(target_position.y),
+                   "target_position_z": str(target_position.z),
+               },
+           )
 
-            return CommandResult.from_dict(
-                success=True,
-                message="吐粉完成",
-                data={
-                    "target_position_x": str(target_position.x),
-                    "target_position_y": str(target_position.y),
-                    "target_position_z": str(target_position.z),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"吐粉失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("DispensePowder exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"吐粉失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("DispensePowder exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})

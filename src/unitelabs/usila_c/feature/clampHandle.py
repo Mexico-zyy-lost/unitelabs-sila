@@ -72,8 +72,7 @@ class CLAMPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始物料转移")
+           intermediate.send("开始物料转移")
 
             uds = await self._get_uds()
 
@@ -84,47 +83,39 @@ class CLAMPFeature(sila.Feature):
                 "release_after_finish": release_after_finish,
             }
 
-            status.update(progress=0.4)
-            intermediate.send("取料中...")
+           intermediate.send("取料中...")
+           intermediate.send("下发转移指令至下位机")
 
-            status.update(progress=0.7)
-            intermediate.send("下发转移指令至下位机")
+           resp = await uds.send_and_stream(cmd="move_serial", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            resp = await uds.send_request(cmd="move_serial", params=req_params)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "move_serial command failed")
+               raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
 
-            status.update(progress=0.95)
-            ret_code = resp.get("code", -1)
+           intermediate.send("物料转移完成")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "move_serial command failed")
-                raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
+           return CommandResult.from_dict(
+               success=True,
+               message="物料转移完成",
+               data={
+                   "source_x": str(source_position.x),
+                   "source_y": str(source_position.y),
+                   "source_z": str(source_position.z),
+                   "target_x": str(target_position.x),
+                   "target_y": str(target_position.y),
+                   "target_z": str(target_position.z),
+                   "release_after_finish": str(release_after_finish),
+               },
+           )
 
-            status.update(progress=1.0)
-            intermediate.send("物料转移完成")
-
-            return CommandResult.from_dict(
-                success=True,
-                message="物料转移完成",
-                data={
-                    "source_x": str(source_position.x),
-                    "source_y": str(source_position.y),
-                    "source_z": str(source_position.z),
-                    "target_x": str(target_position.x),
-                    "target_y": str(target_position.y),
-                    "target_z": str(target_position.z),
-                    "release_after_finish": str(release_after_finish),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"转移失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("TransferItem exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"转移失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("TransferItem exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})

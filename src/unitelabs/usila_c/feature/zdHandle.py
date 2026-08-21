@@ -56,8 +56,7 @@ class ZDFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
-            status.update(progress=0.1)
-            intermediate.send("开始执行振荡")
+           intermediate.send("开始执行振荡")
 
             uds = await self._get_uds()
 
@@ -65,38 +64,32 @@ class ZDFeature(sila.Feature):
                 "duration": duration,
             }
 
-            status.update(progress=0.5)
-            intermediate.send("下发振荡指令至下位机")
+           intermediate.send("下发振荡指令至下位机")
 
-            resp = await uds.send_request(cmd="StartVortex", params=req_params)
+           resp = await uds.send_and_stream(cmd="StartVortex", params=req_params, status=status, intermediate=intermediate)
+           ret_code = resp.get("code", -1)
 
-            status.update(progress=0.9)
-            ret_code = resp.get("code", -1)
+           if ret_code != 0:
+               err_msg = resp.get("msg", "StartVortex command failed")
+               raise DeviceCommandError(f"StartVortex fail, code={ret_code}, msg={err_msg}")
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "StartVortex command failed")
-                raise DeviceCommandError(f"StartVortex fail, code={ret_code}, msg={err_msg}")
+           intermediate.send("振荡完成")
 
-            status.update(progress=1.0)
-            intermediate.send("振荡完成")
+           return CommandResult.from_dict(
+               success=True,
+               message="振荡完成",
+               data={
+                   "duration_ms": str(duration),
+               },
+           )
 
-            return CommandResult.from_dict(
-                success=True,
-                message="振荡完成",
-                data={
-                    "duration_ms": str(duration),
-                },
-            )
-
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            status.update(progress=1.0)
-            intermediate.send(f"振荡失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("StartVortex exception")
-            status.update(progress=1.0)
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
+       except asyncio.CancelledError:
+           raise
+       except DeviceCommandError as e:
+           intermediate.send(f"振荡失败:{e!s}")
+           return CommandResult.from_dict(False, str(e), {})
+       except Exception as e:
+           logger.exception("StartVortex exception")
+           err_msg = f"通信异常:{e!s}"
+           intermediate.send(err_msg)
+           return CommandResult.from_dict(False, err_msg, {})
