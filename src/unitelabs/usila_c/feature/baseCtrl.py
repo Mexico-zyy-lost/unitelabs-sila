@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from dataclasses import dataclass
 
@@ -34,6 +35,10 @@ class KeyValueItem(sila.CustomDataType):
     value: str
 
 
+# 键值数据列表在 CommandResult 外部定义，传输时序列化为字符串。
+KeyValueList = list[KeyValueItem]
+
+
 @dataclass
 class CommandResult(sila.CustomDataType):
     """
@@ -47,15 +52,19 @@ class CommandResult(sila.CustomDataType):
 
     success: bool
     message: str
-    data: list[KeyValueItem]
+    data: str
 
     @staticmethod
     def from_dict(success: bool, message: str, data: dict[str, str]) -> "CommandResult":
-        kv_list = [KeyValueItem(key=k, value=v) for k, v in data.items()]
-        return CommandResult(success=success, message=message, data=kv_list)
+        kv_list: KeyValueList = [KeyValueItem(key=k, value=v) for k, v in data.items()]
+        serialized_data = json.dumps(
+            {item.key: item.value for item in kv_list},
+            ensure_ascii=False,
+        )
+        return CommandResult(success=success, message=message, data=serialized_data)
 
     def to_dict(self) -> dict[str, str]:
-        return {item.key: item.value for item in self.data}
+        return json.loads(self.data) if self.data else {}
 
 
 @dataclass
@@ -313,7 +322,7 @@ class DeviceBaseFeature(sila.Feature):
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
-    ) -> None:
+    ) -> CommandResult:
         """
         执行设备上电初始化，包括各轴回零、传感器自检
 
@@ -333,6 +342,7 @@ class DeviceBaseFeature(sila.Feature):
 
             intermediate.send("初始化完成")
 
+            return CommandResult.from_dict(True, "初始化完成", {})
         except asyncio.CancelledError:
             raise
         except DeviceCommandError as e:
