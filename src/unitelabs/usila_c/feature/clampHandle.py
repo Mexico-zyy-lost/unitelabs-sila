@@ -57,6 +57,7 @@ class CLAMPFeature(sila.Feature):
         target_position: Position3D,
         gripper_param: GripperParam,
         release_after_finish: bool,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -86,7 +87,7 @@ class CLAMPFeature(sila.Feature):
             intermediate.send("取料中...")
             intermediate.send("下发转移指令至下位机")
 
-            resp = await uds.send_request(cmd="move_serial", params=req_params)
+            resp = await uds.send_request(cmd="move_serial", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

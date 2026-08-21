@@ -62,6 +62,7 @@ class CAPFeature(sila.Feature):
         rotation_speed: float,
         rotation_force: float,
         z_lift_height: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -102,7 +103,7 @@ class CAPFeature(sila.Feature):
             intermediate.send("旋转开盖中...")
             intermediate.send("下发开盖指令至下位机")
 
-            resp = await uds.send_request(cmd="rotate_open", params=req_params)
+            resp = await uds.send_request(cmd="rotate_open", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -141,6 +142,7 @@ class CAPFeature(sila.Feature):
         rotation_speed: float,
         rotation_force: float,
         z_lift_height: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -172,7 +174,7 @@ class CAPFeature(sila.Feature):
             intermediate.send("旋转关盖中...")
             intermediate.send("下发关盖指令至下位机")
 
-            resp = await uds.send_request(cmd="rotate_close", params=req_params)
+            resp = await uds.send_request(cmd="rotate_close", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

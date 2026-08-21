@@ -45,9 +45,9 @@ class WSFeature(sila.Feature):
             print("✅WSFeature UDS连接完成")
 
     @sila.UnobservableCommand()
-    async def Tare(self) -> None:
+    async def Tare(self, *, timeout: int = 10) -> None:
         uds = await self._get_uds()
-        resp = await uds.send_request(cmd="Tare", params={})
+        resp = await uds.send_request(cmd="Tare", params={}, timeout=timeout)
         ret_code = resp.get("code", -1)
         if ret_code != 0:
             err_msg = resp.get("msg", "tare command failed")

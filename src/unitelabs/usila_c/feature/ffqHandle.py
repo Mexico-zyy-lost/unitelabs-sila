@@ -50,7 +50,12 @@ class FFQFeature(sila.Feature):
     # ------------------------------
     @sila.ObservableCommand(name="LoadPowderBucket", errors=[DeviceCommandError])
     async def LoadPowderBucket(
-        self, *, load_position: Position3D, status: sila.Status, intermediate: sila.Intermediate[str]
+        self,
+        *,
+        load_position: Position3D,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         """
         装载粉桶。Server自动选择分粉Z轴，解算电机坐标后执行。
@@ -69,7 +74,7 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="load_bucket", params=req_params)
+            resp = await uds.send_request(cmd="load_bucket", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -101,7 +106,12 @@ class FFQFeature(sila.Feature):
 
     @sila.ObservableCommand(name="UnloadPowderBucket", errors=[DeviceCommandError])
     async def UnloadPowderBucket(
-        self, *, unload_position: Position3D, status: sila.Status, intermediate: sila.Intermediate[str]
+        self,
+        *,
+        unload_position: Position3D,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         """
         卸载粉桶。
@@ -120,7 +130,7 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="unload_bucket_1", params=req_params)
+            resp = await uds.send_request(cmd="unload_bucket_1", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -159,6 +169,7 @@ class FFQFeature(sila.Feature):
         powder_surface_z: float,
         pick_depth: float,
         compact_depth: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -189,7 +200,7 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="take_powder", params=req_params)
+            resp = await uds.send_request(cmd="take_powder", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -223,7 +234,12 @@ class FFQFeature(sila.Feature):
 
     @sila.ObservableCommand(name="DispensePowder", errors=[DeviceCommandError])
     async def DispensePowder(
-        self, *, target_position: Position3D, status: sila.Status, intermediate: sila.Intermediate[str]
+        self,
+        *,
+        target_position: Position3D,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         """
         吐粉。
@@ -242,7 +258,7 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="spit_powder_1", params=req_params)
+            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

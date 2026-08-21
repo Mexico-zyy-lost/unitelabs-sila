@@ -45,7 +45,12 @@ class ZDFeature(sila.Feature):
     # ------------------------------
     @sila.ObservableCommand(name="StartVortex", errors=[DeviceCommandError])
     async def StartVortex(
-        self, *, duration: float, status: sila.Status, intermediate: sila.Intermediate[str]
+        self,
+        *,
+        duration: float,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         """
         执行振荡。
@@ -66,7 +71,7 @@ class ZDFeature(sila.Feature):
 
             intermediate.send("下发振荡指令至下位机")
 
-            resp = await uds.send_request(cmd="StartVortex", params=req_params)
+            resp = await uds.send_request(cmd="StartVortex", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

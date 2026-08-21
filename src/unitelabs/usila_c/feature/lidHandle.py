@@ -50,7 +50,13 @@ class LIDFeature(sila.Feature):
     # ------------------------------
     @sila.ObservableCommand(name="AttachTip", errors=[DeviceCommandError])
     async def AttachTip(
-        self, *, tip_position: Position3D, press_force: float, status: sila.Status, intermediate: sila.Intermediate[str]
+        self,
+        *,
+        tip_position: Position3D,
+        press_force: float,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         """
         安装Tip头。Server自动选择移液Z轴。
@@ -73,7 +79,7 @@ class LIDFeature(sila.Feature):
 
             intermediate.send("下发安装指令至下位机")
 
-            resp = await uds.send_request(cmd="AttachTip", params=req_params)
+            resp = await uds.send_request(cmd="AttachTip", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -112,6 +118,7 @@ class LIDFeature(sila.Feature):
         volume: float,
         aspirate_speed: float,
         immersion_depth: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -141,7 +148,7 @@ class LIDFeature(sila.Feature):
             intermediate.send("针头下降中...")
             intermediate.send("下发吸液指令至下位机")
 
-            resp = await uds.send_request(cmd="Aspirate", params=req_params)
+            resp = await uds.send_request(cmd="Aspirate", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -181,6 +188,7 @@ class LIDFeature(sila.Feature):
         volume: float,
         dispense_speed: float,
         immersion_depth: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -210,7 +218,7 @@ class LIDFeature(sila.Feature):
             intermediate.send("针头下降中...")
             intermediate.send("下发排液指令至下位机")
 
-            resp = await uds.send_request(cmd="Dispense", params=req_params)
+            resp = await uds.send_request(cmd="Dispense", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -248,6 +256,7 @@ class LIDFeature(sila.Feature):
         *,
         eject_position: Position3D,
         eject_force: float,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -272,7 +281,7 @@ class LIDFeature(sila.Feature):
 
             intermediate.send("下发退Tip指令至下位机")
 
-            resp = await uds.send_request(cmd="EjectTip", params=req_params)
+            resp = await uds.send_request(cmd="EjectTip", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

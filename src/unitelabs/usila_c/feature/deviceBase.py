@@ -307,7 +307,13 @@ class DeviceBaseFeature(sila.Feature):
     # Commands
     # ------------------------------
     @sila.ObservableCommand(name="Initialize", errors=[DeviceCommandError])
-    async def Initialize(self, *, status: sila.Status, intermediate: sila.Intermediate[str]) -> None:
+    async def Initialize(
+        self,
+        *,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
+    ) -> None:
         """
         执行设备上电初始化，包括各轴回零、传感器自检
 
@@ -318,7 +324,7 @@ class DeviceBaseFeature(sila.Feature):
             intermediate.send("开始执行设备初始化")
 
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="Initialize", params={})
+            resp = await uds.send_request(cmd="Initialize", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -337,11 +343,11 @@ class DeviceBaseFeature(sila.Feature):
             raise DeviceCommandError(f"通信异常:{e!s}") from e
 
     @sila.UnobservableCommand(name="EmergencyStop")
-    async def EmergencyStop(self) -> CommandResult:
+    async def EmergencyStop(self, *, timeout: int = 10) -> CommandResult:
         """立即停止所有运动，进入安全状态"""
         try:
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="EmergencyStop", params={})
+            resp = await uds.send_request(cmd="EmergencyStop", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "emergency stop command failed")
@@ -363,6 +369,7 @@ class DeviceBaseFeature(sila.Feature):
         gripper_z_speed: float,
         liquid_z_speed: float,
         gripper_speed: float,
+        timeout: int = 10,
     ) -> CommandResult:
         """
         设置各轴运动速度等通用参数。
@@ -384,7 +391,7 @@ class DeviceBaseFeature(sila.Feature):
                 "liquid_z_speed": liquid_z_speed,
                 "gripper_speed": gripper_speed,
             }
-            resp = await uds.send_request(cmd="SetGeneralParameters", params=params)
+            resp = await uds.send_request(cmd="SetGeneralParameters", params=params, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "SetGeneralParameters failed")
@@ -405,6 +412,7 @@ class DeviceBaseFeature(sila.Feature):
         gripper_z_calibration: list[CalibrationPair],
         liquid_z_calibration: list[CalibrationPair],
         *,
+        timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
     ) -> CommandResult:
@@ -429,7 +437,7 @@ class DeviceBaseFeature(sila.Feature):
 
             intermediate.send("下发标定参数至下位机")
 
-            resp = await uds.send_request(cmd="CoordinateCalibration", params=req_params)
+            resp = await uds.send_request(cmd="CoordinateCalibration", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                err_msg = resp.get("msg", "CoordinateCalibration failed")
