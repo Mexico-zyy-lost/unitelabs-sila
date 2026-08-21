@@ -4,7 +4,7 @@ import traceback
 from importlib.metadata import version
 
 from unitelabs.cdk import Connector, ConnectorBaseConfig, SiLAServerConfig
-from unitelabs.usila_c.authentication_service import AuthenticationService
+from unitelabs.usila_c.feature.authentication_service import AuthenticationService
 
 from unitelabs.usila_c.feature.capHandle import CAPFeature
 from unitelabs.usila_c.feature.clampHandle import CLAMPFeature
