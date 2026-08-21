@@ -75,25 +75,25 @@ class ZDFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "StartVortex command failed")
-               raise DeviceCommandError(f"StartVortex fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "StartVortex command failed")
+                raise DeviceCommandError(f"StartVortex fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("振荡完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="振荡完成",
-               data={
-                   "duration_ms": str(duration),
-               },
+                success=True,
+                message="振荡完成",
+                data={
+                    "duration_ms": str(duration),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"振荡失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("StartVortex exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)

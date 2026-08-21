@@ -91,31 +91,31 @@ class CLAMPFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "move_serial command failed")
-               raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "move_serial command failed")
+                raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("物料转移完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="物料转移完成",
-               data={
-                   "source_x": str(source_position.x),
-                   "source_y": str(source_position.y),
-                   "source_z": str(source_position.z),
-                   "target_x": str(target_position.x),
-                   "target_y": str(target_position.y),
-                   "target_z": str(target_position.z),
-                   "release_after_finish": str(release_after_finish),
-               },
+                success=True,
+                message="物料转移完成",
+                data={
+                    "source_x": str(source_position.x),
+                    "source_y": str(source_position.y),
+                    "source_z": str(source_position.z),
+                    "target_x": str(target_position.x),
+                    "target_y": str(target_position.y),
+                    "target_z": str(target_position.z),
+                    "release_after_finish": str(release_after_finish),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"转移失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("TransferItem exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)

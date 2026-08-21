@@ -83,28 +83,28 @@ class LIDFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "AttachTip command failed")
-               raise DeviceCommandError(f"AttachTip fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "AttachTip command failed")
+                raise DeviceCommandError(f"AttachTip fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("Tip头安装完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="Tip头安装完成",
-               data={
-                   "tip_position_x": str(tip_position.x),
-                   "tip_position_y": str(tip_position.y),
-                   "tip_position_z": str(tip_position.z),
-                   "press_force": str(press_force),
-               },
+                success=True,
+                message="Tip头安装完成",
+                data={
+                    "tip_position_x": str(tip_position.x),
+                    "tip_position_y": str(tip_position.y),
+                    "tip_position_z": str(tip_position.z),
+                    "press_force": str(press_force),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"Tip头安装失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("AttachTip exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
@@ -152,29 +152,29 @@ class LIDFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "Aspirate command failed")
-               raise DeviceCommandError(f"Aspirate fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "Aspirate command failed")
+                raise DeviceCommandError(f"Aspirate fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("吸液完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="吸液完成",
-               data={
-                   "target_position_x": str(target_position.x),
-                   "target_position_y": str(target_position.y),
-                   "target_position_z": str(target_position.z),
-                   "volume": str(volume),
-                   "aspirate_speed": str(aspirate_speed),
-               },
+                success=True,
+                message="吸液完成",
+                data={
+                    "target_position_x": str(target_position.x),
+                    "target_position_y": str(target_position.y),
+                    "target_position_z": str(target_position.z),
+                    "volume": str(volume),
+                    "aspirate_speed": str(aspirate_speed),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"吸液失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("Aspirate exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
@@ -222,29 +222,29 @@ class LIDFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "Dispense command failed")
-               raise DeviceCommandError(f"Dispense fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "Dispense command failed")
+                raise DeviceCommandError(f"Dispense fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("排液完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="排液完成",
-               data={
-                   "target_position_x": str(target_position.x),
-                   "target_position_y": str(target_position.y),
-                   "target_position_z": str(target_position.z),
-                   "volume": str(volume),
-                   "dispense_speed": str(dispense_speed),
-               },
+                success=True,
+                message="排液完成",
+                data={
+                    "target_position_x": str(target_position.x),
+                    "target_position_y": str(target_position.y),
+                    "target_position_z": str(target_position.z),
+                    "volume": str(volume),
+                    "dispense_speed": str(dispense_speed),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"排液失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("Dispense exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
@@ -285,28 +285,28 @@ class LIDFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "EjectTip command failed")
-               raise DeviceCommandError(f"EjectTip fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "EjectTip command failed")
+                raise DeviceCommandError(f"EjectTip fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("Tip头退出完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="Tip头退出完成",
-               data={
-                   "eject_position_x": str(eject_position.x),
-                   "eject_position_y": str(eject_position.y),
-                   "eject_position_z": str(eject_position.z),
-                   "eject_force": str(eject_force),
-               },
+                success=True,
+                message="Tip头退出完成",
+                data={
+                    "eject_position_x": str(eject_position.x),
+                    "eject_position_y": str(eject_position.y),
+                    "eject_position_z": str(eject_position.z),
+                    "eject_force": str(eject_force),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"Tip头退出失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("EjectTip exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)

@@ -107,27 +107,27 @@ class CAPFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "rotate_open command failed")
-               raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "rotate_open command failed")
+                raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("开盖完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="开盖完成",
-               data={
-                   "container_diameter": str(container_diameter),
-                   "rotation_cycles": str(rotation_cycles),
-                   "rotation_speed": str(rotation_speed),
-               },
+                success=True,
+                message="开盖完成",
+                data={
+                    "container_diameter": str(container_diameter),
+                    "rotation_cycles": str(rotation_cycles),
+                    "rotation_speed": str(rotation_speed),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"开盖失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("OpenCap exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
@@ -178,26 +178,26 @@ class CAPFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "rotate_close command failed")
-               raise DeviceCommandError(f"rotate_close fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "rotate_close command failed")
+                raise DeviceCommandError(f"rotate_close fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("关盖完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="关盖完成",
-               data={
-                   "rotation_cycles": str(rotation_cycles),
-                   "rotation_speed": str(rotation_speed),
-               },
+                success=True,
+                message="关盖完成",
+                data={
+                    "rotation_cycles": str(rotation_cycles),
+                    "rotation_speed": str(rotation_speed),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"关盖失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("CloseCap exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)

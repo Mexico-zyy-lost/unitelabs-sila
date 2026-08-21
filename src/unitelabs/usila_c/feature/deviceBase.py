@@ -328,17 +328,17 @@ class DeviceBaseFeature(sila.Feature):
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-               err_msg = resp.get("msg", "initialize command failed")
-               raise DeviceCommandError(f"Initialize fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "initialize command failed")
+                raise DeviceCommandError(f"Initialize fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("初始化完成")
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             # 抛出SiLA标准业务异常，由CDK框架向外输出错误
             raise e
-       except Exception as e:
+        except Exception as e:
             logger.exception("Initialize exception")
             raise DeviceCommandError(f"通信异常:{e!s}") from e
 
@@ -440,29 +440,29 @@ class DeviceBaseFeature(sila.Feature):
             resp = await uds.send_request(cmd="CoordinateCalibration", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
-               err_msg = resp.get("msg", "CoordinateCalibration failed")
-               raise DeviceCommandError(f"CoordinateCalibration fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "CoordinateCalibration failed")
+                raise DeviceCommandError(f"CoordinateCalibration fail, code={ret_code}, msg={err_msg}")
 
             res_data = resp.get("result", {})
             intermediate.send("坐标标定完成")
 
             return CommandResult.from_dict(
-               success=True,
-               message="坐标标定完成",
-               data={
-                   "powder_z_residual": str(res_data.get("powder_z_residual", "")),
-                   "gripper_z_residual": str(res_data.get("gripper_z_residual", "")),
-                   "liquid_z_residual": str(res_data.get("liquid_z_residual", "")),
-                   "calibration_timestamp": str(res_data.get("calibration_timestamp", "")),
-               },
+                success=True,
+                message="坐标标定完成",
+                data={
+                    "powder_z_residual": str(res_data.get("powder_z_residual", "")),
+                    "gripper_z_residual": str(res_data.get("gripper_z_residual", "")),
+                    "liquid_z_residual": str(res_data.get("liquid_z_residual", "")),
+                    "calibration_timestamp": str(res_data.get("calibration_timestamp", "")),
+                },
             )
 
-       except asyncio.CancelledError:
+        except asyncio.CancelledError:
             raise
-       except DeviceCommandError as e:
+        except DeviceCommandError as e:
             intermediate.send(f"标定失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
-       except Exception as e:
+        except Exception as e:
             logger.exception("CoordinateCalibration exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
