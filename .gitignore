@@ -227,3 +227,4 @@ config.yml
 
 # Log files
 logs/connector.log*
+src/unitelabs/usila_c/feature/deviceBase.py
