@@ -306,7 +306,7 @@ class DeviceBaseFeature(sila.Feature):
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="Initialize", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="initial", errors=[DeviceCommandError])
     async def Initialize(
         self,
         *,
@@ -324,12 +324,12 @@ class DeviceBaseFeature(sila.Feature):
             intermediate.send("开始执行设备初始化")
 
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="Initialize", params={}, timeout=timeout)
+            resp = await uds.send_request(cmd="initial", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "initialize command failed")
-                raise DeviceCommandError(f"Initialize fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "initial command failed")
+                raise DeviceCommandError(f"initial fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("初始化完成")
 
@@ -339,7 +339,7 @@ class DeviceBaseFeature(sila.Feature):
             # 抛出SiLA标准业务异常，由CDK框架向外输出错误
             raise e
         except Exception as e:
-            logger.exception("Initialize exception")
+            logger.exception("initial exception")
             raise DeviceCommandError(f"通信异常:{e!s}") from e
 
     @sila.UnobservableCommand(name="EmergencyStop")
