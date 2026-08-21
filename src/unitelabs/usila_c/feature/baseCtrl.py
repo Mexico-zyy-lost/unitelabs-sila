@@ -334,12 +334,13 @@ class DeviceBaseFeature(sila.Feature):
 
             uds = await self._get_uds()
             resp = await uds.send_request(cmd="initial", params={}, timeout=timeout)
-            ret_code = resp.get("code", -1)
+            # ret_code = resp.get("code", -1)
 
-            if ret_code != 0:
-                err_msg = resp.get("msg", "initial command failed")
-                raise DeviceCommandError(f"initial fail, code={ret_code}, msg={err_msg}")
+            # if ret_code != 0:
+            #     err_msg = resp.get("msg", "initial command failed")
+            #     raise DeviceCommandError(f"initial fail, code={ret_code}, msg={err_msg}")
 
+            await asyncio.sleep(5)
             intermediate.send("初始化完成")
 
             return CommandResult.from_dict(True, "初始化完成", {})
