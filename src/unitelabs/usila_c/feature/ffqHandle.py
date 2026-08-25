@@ -57,6 +57,7 @@ class FFQFeature(sila.Feature):
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
+        ctx: ExecutionContext,
     ) -> CommandResult:
         """
         装载粉桶。Server自动选择分粉Z轴，解算电机坐标后执行。
@@ -70,6 +71,9 @@ class FFQFeature(sila.Feature):
             intermediate.send("开始装载粉桶")
 
             uds = await self._get_uds()
+
+            exec_uuid = ctx.execution_uuid
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid}")
 
             req_params = {"load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z}}
 
