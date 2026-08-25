@@ -49,7 +49,7 @@ class CLAMPFeature(sila.Feature):
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="move_serial", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="TransferItem", errors=[DeviceCommandError])
     async def TransferItem(
         self,
         *,
@@ -85,14 +85,28 @@ class CLAMPFeature(sila.Feature):
             }
 
             intermediate.send("取料中...")
-            intermediate.send("下发转移指令至下位机")
 
+            intermediate.send("下发取试管指令至下位机")
+            resp = await uds.send_request(cmd="grab_tube", params=req_params, timeout=timeout)
+            ret_code = resp.get("code", -1)
+            if ret_code != 0:
+                err_msg = resp.get("msg", "grab_tube command failed")
+                raise DeviceCommandError(f"grab_tube fail, code={ret_code}, msg={err_msg}")
+
+            intermediate.send("下发x、y运动指令至下位机")
             resp = await uds.send_request(cmd="move_serial", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
-
             if ret_code != 0:
                 err_msg = resp.get("msg", "move_serial command failed")
                 raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
+
+            intermediate.send("下发放下试管指令至下位机")
+            resp = await uds.send_request(cmd="put_tube", params=req_params, timeout=timeout)
+            ret_code = resp.get("code", -1)
+
+            if ret_code != 0:
+                err_msg = resp.get("msg", "put_tube command failed")
+                raise DeviceCommandError(f"put_tube fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("物料转移完成")
 

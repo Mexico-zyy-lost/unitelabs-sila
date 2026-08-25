@@ -334,13 +334,13 @@ class DeviceBaseFeature(sila.Feature):
 
             uds = await self._get_uds()
             resp = await uds.send_request(cmd="initial", params={}, timeout=timeout)
-            # ret_code = resp.get("code", -1)
+            ret_code = resp.get("code", -1)
 
-            # if ret_code != 0:
-            #     err_msg = resp.get("msg", "initial command failed")
-            #     raise DeviceCommandError(f"initial fail, code={ret_code}, msg={err_msg}")
+            if ret_code != 0:
+                err_msg = resp.get("msg", "initial command failed")
+                raise DeviceCommandError(f"initial fail, code={ret_code}, msg={err_msg}")
 
-            await asyncio.sleep(5)
+            # await asyncio.sleep(5)
             intermediate.send("初始化完成")
 
             return CommandResult.from_dict(True, "初始化完成", {})
@@ -358,7 +358,7 @@ class DeviceBaseFeature(sila.Feature):
         """立即停止所有运动，进入安全状态"""
         try:
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="EmergencyStop", params={}, timeout=timeout)
+            resp = await uds.send_request(cmd="stp", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "emergency stop command failed")
@@ -395,18 +395,21 @@ class DeviceBaseFeature(sila.Feature):
         try:
             uds = await self._get_uds()
             params = {
-                "x_speed": x_speed,
-                "y_speed": y_speed,
-                "powder_z_speed": powder_z_speed,
-                "gripper_z_speed": gripper_z_speed,
-                "liquid_z_speed": liquid_z_speed,
-                "gripper_speed": gripper_speed,
+                "X_M": x_speed,
+                "Y_M": y_speed,
+                "FFQ_M": powder_z_speed,
+                "CLAM_M": gripper_z_speed,
+                "LID_M": liquid_z_speed,
+                "CLAM": gripper_speed,
             }
-            resp = await uds.send_request(cmd="SetGeneralParameters", params=params, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "SetGeneralParameters failed")
-                raise DeviceCommandError(f"SetGeneralParameters fail, code={ret_code}, msg={err_msg}")
+
+            # 下位机需要逐个参数下发，不能一次性把所有速度值打包发送
+            for key, value in params.items():
+                resp = await uds.send_request(cmd="set", params={key: value}, timeout=timeout)
+                ret_code = resp.get("code", -1)
+                if ret_code != 0:
+                    err_msg = resp.get("msg", f"SetGeneralParameters {key} failed")
+                    raise DeviceCommandError(f"SetGeneralParameters fail, key={key}, code={ret_code}, msg={err_msg}")
 
             out_data = {k: str(v) for k, v in params.items()}
             return CommandResult.from_dict(True, "通用参数设置成功", out_data)

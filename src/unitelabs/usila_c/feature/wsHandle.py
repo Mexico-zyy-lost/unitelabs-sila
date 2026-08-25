@@ -1,8 +1,10 @@
-import asyncio
 import logging
 
 from unitelabs.cdk import sila
 
+from unitelabs.usila_c.feature.baseCtrl import (
+    CommandResult,
+)
 from unitelabs.usila_c.socket_client import UdsClient
 
 logger = logging.getLogger(__name__)
@@ -44,22 +46,59 @@ class WSFeature(sila.Feature):
             self._connected = True
             print("✅WSFeature UDS连接完成")
 
-    @sila.UnobservableCommand()
-    async def Tare(self, *, timeout: int = 10) -> None:
-        uds = await self._get_uds()
-        resp = await uds.send_request(cmd="Tare", params={}, timeout=timeout)
-        ret_code = resp.get("code", -1)
-        if ret_code != 0:
-            err_msg = resp.get("msg", "tare command failed")
-            raise WsCommandError(f"WS tare fail, code={ret_code}, msg={err_msg}")
+    @sila.UnobservableCommand(name="Tare", errors=[WsCommandError])
+    async def Tare(
+        self,
+        *,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
+    ) -> CommandResult:
+        try:
+            intermediate.send("开始去皮")
+            uds = await self._get_uds()
+            resp = await uds.send_request(cmd="Tare", params={}, timeout=timeout)
+            ret_code = resp.get("code", -1)
+            if ret_code != 0:
+                err_msg = resp.get("msg", "tare command failed")
+                raise WsCommandError(f"WS tare fail, code={ret_code}, msg={err_msg}")
 
-    @sila.ObservableProperty()
+            intermediate.send("去皮完成")
+            return CommandResult.from_dict(
+                success=True,
+                message="去皮成功",
+                data={
+                    "status": "tare_ok",
+                },
+            )
+        except asyncio.CancelledError:
+            raise
+        except WsCommandError as e:
+            intermediate.send(f"去皮失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
+        except Exception as e:
+            logger.exception("Tare exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})
+
+    @sila.ObservableProperty(name="GrossWeightGram")
     async def GrossWeightGram(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetGrossWeight", params={})
-                yield float(resp["result"]["weight_g"])
+                resp = await uds.send_request(cmd="S", params={}, timeout=10)
+                ret_code = resp.get("code", -1)
+                if ret_code != 0:
+                    err_msg = resp.get("msg", "gross weight read failed")
+                    logger.warning(f"WS GrossWeightGram fail, code={ret_code}, msg={err_msg}")
+                    yield 0.0
+                else:
+                    weight_g = float(resp.get("result", {}).get("weight_g", 0.0))
+                    yield weight_g
+            except asyncio.CancelledError:
+                raise
             except Exception as e:
-                print(f"读取天平异常 {e}")
-            await asyncio.sleep(2)  # 轮询间隔
+                logger.warning(f"读取天平异常 {e}")
+                yield 0.0
+            await asyncio.sleep(2)

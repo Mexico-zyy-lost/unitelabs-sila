@@ -53,6 +53,7 @@ class FFQFeature(sila.Feature):
         self,
         *,
         load_position: Position3D,
+        type: int = 1,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -74,7 +75,10 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发装载指令至下位机")
 
-            resp = await uds.send_request(cmd="load_bucket", params=req_params, timeout=timeout)
+            if type == 1:
+                resp = await uds.send_request(cmd="load_bucket_1", params=req_params, timeout=timeout)
+            elif type == 2:
+                resp = await uds.send_request(cmd="load_bucket_2", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -109,6 +113,7 @@ class FFQFeature(sila.Feature):
         self,
         *,
         unload_position: Position3D,
+        type: int = 1,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -130,12 +135,15 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发卸载指令至下位机")
 
-            resp = await uds.send_request(cmd="unload_bucket_1", params=req_params, timeout=timeout)
+            if type == 1:
+                resp = await uds.send_request(cmd="unload_bucket_1", params=req_params, timeout=timeout)
+            elif type == 2:
+                resp = await uds.send_request(cmd="unload_bucket_2", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
-                err_msg = resp.get("msg", "unload_bucket_1 command failed")
-                raise DeviceCommandError(f"unload_bucket_1 fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "unload_bucket command failed")
+                raise DeviceCommandError(f"unload_bucket fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("粉桶卸载完成")
 

@@ -71,7 +71,7 @@ class ZDFeature(sila.Feature):
 
             intermediate.send("下发振荡指令至下位机")
 
-            resp = await uds.send_request(cmd="StartVortex", params=req_params, timeout=timeout)
+            resp = await uds.send_request(cmd="activate_shock", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
