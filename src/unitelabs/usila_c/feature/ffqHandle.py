@@ -1,5 +1,8 @@
 import asyncio
 import logging
+import uuid
+#import CommandExecutionUUID
+from contextvars import ContextVar
 
 from unitelabs.cdk import sila
 
@@ -11,6 +14,18 @@ from unitelabs.usila_c.feature.baseCtrl import (
 from unitelabs.usila_c.socket_client import UdsClient
 
 logger = logging.getLogger(__name__)
+
+# ======================【必须放在文件顶层，Feature类外面】======================
+_EXEC_UUID_CTX: ContextVar[uuid.UUID | None] = ContextVar("_execution_uuid", default=None)
+
+def get_current_execution_uuid() -> uuid.UUID:
+    val = _EXEC_UUID_CTX.get()
+    if val is None:
+        raise RuntimeError("get_current_execution_uuid() 只能在SiLA Command函数内部调用")
+    return val
+
+def get_exec_uuid_str() -> str:
+    return str(get_current_execution_uuid())
 
 
 # -----------------------------------------------------------------------------
@@ -57,7 +72,6 @@ class FFQFeature(sila.Feature):
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
-        ctx: ExecutionContext,
     ) -> CommandResult:
         """
         装载粉桶。Server自动选择分粉Z轴，解算电机坐标后执行。
@@ -72,12 +86,23 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            exec_uuid = ctx.execution_uuid
-            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid}")
+            # ✅直接从context var拿execution_uuid，兼容0.6/0.7版本cdk
+            # exec_uuid = self.context.uuid
+            #exec_uuid = status.command_execution.execution_uuid   # UUID对象
+            #exec_uuid_str = str(status.command_execution.execution_uuid)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
             req_params = {"load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z}}
 
-            intermediate.send("下发装载指令至下位机")
+            #intermediate.send("下发装载指令至下位机")
 
             if type == 1:
                 resp = await uds.send_request(cmd="load_bucket_1", params=req_params, timeout=timeout)
