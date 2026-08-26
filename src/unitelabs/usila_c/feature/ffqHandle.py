@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import uuid
-#import CommandExecutionUUID
+
+# import CommandExecutionUUID
 from contextvars import ContextVar
 
 from unitelabs.cdk import sila
@@ -18,11 +19,13 @@ logger = logging.getLogger(__name__)
 # ======================【必须放在文件顶层，Feature类外面】======================
 _EXEC_UUID_CTX: ContextVar[uuid.UUID | None] = ContextVar("_execution_uuid", default=None)
 
+
 def get_current_execution_uuid() -> uuid.UUID:
     val = _EXEC_UUID_CTX.get()
     if val is None:
         raise RuntimeError("get_current_execution_uuid() 只能在SiLA Command函数内部调用")
     return val
+
 
 def get_exec_uuid_str() -> str:
     return str(get_current_execution_uuid())
@@ -86,10 +89,6 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            # ✅直接从context var拿execution_uuid，兼容0.6/0.7版本cdk
-            # exec_uuid = self.context.uuid
-            #exec_uuid = status.command_execution.execution_uuid   # UUID对象
-            #exec_uuid_str = str(status.command_execution.execution_uuid)
             # 拿到CommandExecution对象
             cmd_exec = status.command_execution
 
@@ -102,12 +101,16 @@ class FFQFeature(sila.Feature):
 
             req_params = {"load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z}}
 
-            #intermediate.send("下发装载指令至下位机")
+            # intermediate.send("下发装载指令至下位机")
 
             if type == 1:
-                resp = await uds.send_request(cmd="load_bucket_1", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="load_bucket_1", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
             elif type == 2:
-                resp = await uds.send_request(cmd="load_bucket_2", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="load_bucket_2", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
