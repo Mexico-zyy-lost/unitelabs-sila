@@ -9,6 +9,7 @@ from unitelabs.usila_c.feature.authentication_service import AuthenticationServi
 from unitelabs.usila_c.feature.baseCtrl import DeviceBaseFeature
 from unitelabs.usila_c.feature.capHandle import CAPFeature
 from unitelabs.usila_c.feature.clampHandle import CLAMPFeature
+from unitelabs.usila_c.feature.debugCtrl import DebugFeature
 from unitelabs.usila_c.feature.ffqHandle import FFQFeature
 from unitelabs.usila_c.feature.lidHandle import LIDFeature
 from unitelabs.usila_c.feature.wsHandle import WSFeature
@@ -70,6 +71,9 @@ async def create_app(config: ProCConfig) -> collections.abc.AsyncGenerator[Conne
 
         vortex_feat = ZDFeature(uds=SHARED_UDS)
         app.register(vortex_feat)
+
+        debug_feat = DebugFeature(uds=SHARED_UDS)
+        app.register(debug_feat)
 
     except ValueError:
         traceback.print_exc()
