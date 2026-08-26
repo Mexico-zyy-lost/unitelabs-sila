@@ -207,16 +207,14 @@ class DebugFeature(sila.Feature):
         try:
             valid_axes = {"x", "y", "powder_z", "liquid_z", "gripper_z"}
             if axis not in valid_axes:
-                raise DeviceCommandError(
-                    f"AxisStepMove invalid axis={axis!r}, supported={sorted(valid_axes)}"
-                )
+                raise DeviceCommandError(f"AxisStepMove invalid axis={axis!r}, supported={sorted(valid_axes)}")
 
             intermediate.send(f"开始{axis}轴单步移动")
             uds = await self._get_uds()
             params = {"axis": axis, "speed": speed, "position": position}
 
             intermediate.send("下发轴单步移动指令至下位机")
-            resp = await uds.send_request(cmd="AxisStepMove", params=params, timeout=timeout)
+            resp = await uds.send_request(cmd="mov", params=params, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "AxisStepMove command failed")
@@ -286,7 +284,7 @@ class DebugFeature(sila.Feature):
             intermediate.send("开始移液器归零")
             uds = await self._get_uds()
             intermediate.send("下发移液器归零指令至下位机")
-            resp = await uds.send_request(cmd="PipettorHome", params={}, timeout=timeout)
+            resp = await uds.send_request(cmd="It", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "PipettorHome command failed")
@@ -310,7 +308,7 @@ class DebugFeature(sila.Feature):
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetPipettorPressure", params={}, timeout=10)
+                resp = await uds.send_request(cmd="Qp", params={}, timeout=10)
                 result = resp.get("result", {})
                 pressure = result.get("pressure", result.get("value", 0.0))
                 yield float(pressure)

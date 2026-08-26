@@ -175,6 +175,7 @@ class FFQFeature(sila.Feature):
 
             # 转为字符串，用于UDS、日志、下位机通信
             exec_uuid_str = str(exec_uuid)
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
             if type == 1:
                 resp = await uds.send_request(
