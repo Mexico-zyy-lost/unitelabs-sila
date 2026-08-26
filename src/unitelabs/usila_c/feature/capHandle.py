@@ -103,11 +103,26 @@ class CAPFeature(sila.Feature):
 
             intermediate.send("夹紧容器")
 
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
+
             if mode == "open":
-                resp = await uds.send_request(cmd="rotate_open", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="rotate_open", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
                 intermediate.send("旋转开盖中...")
             else:
-                resp = await uds.send_request(cmd="rotate_close", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="rotate_close", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
                 intermediate.send("旋转关盖中...")
             ret_code = resp.get("code", -1)
 

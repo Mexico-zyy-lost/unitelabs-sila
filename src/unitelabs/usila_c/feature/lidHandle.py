@@ -148,7 +148,18 @@ class LIDFeature(sila.Feature):
             intermediate.send("针头下降中...")
             intermediate.send("下发吸液指令至下位机")
 
-            resp = await uds.send_request(cmd="Aspirate", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
+
+            resp = await uds.send_request(cmd="Aspirate", params=req_params, req_id=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -218,7 +229,18 @@ class LIDFeature(sila.Feature):
             intermediate.send("针头下降中...")
             intermediate.send("下发排液指令至下位机")
 
-            resp = await uds.send_request(cmd="Dispense", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
+
+            resp = await uds.send_request(cmd="Dispense", params=req_params, req_id=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -281,7 +303,18 @@ class LIDFeature(sila.Feature):
 
             intermediate.send("下发退Tip指令至下位机")
 
-            resp = await uds.send_request(cmd="EjectTip", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
+
+            resp = await uds.send_request(cmd="EjectTip", params=req_params, req_id=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
