@@ -167,10 +167,23 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发卸载指令至下位机")
 
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
             if type == 1:
-                resp = await uds.send_request(cmd="unload_bucket_1", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="unload_bucket_1", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
             elif type == 2:
-                resp = await uds.send_request(cmd="unload_bucket_2", params=req_params, timeout=timeout)
+                resp = await uds.send_request(
+                    cmd="unload_bucket_2", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                )
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -240,7 +253,16 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发取粉指令至下位机")
 
-            resp = await uds.send_request(cmd="take_powder", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            resp = await uds.send_request(cmd="take_powder", params=req_params, req_id=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -298,7 +320,16 @@ class FFQFeature(sila.Feature):
 
             intermediate.send("下发吐粉指令至下位机")
 
-            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, req_id=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
