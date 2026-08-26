@@ -211,7 +211,7 @@ class DebugFeature(sila.Feature):
 
             intermediate.send(f"开始{axis}轴单步移动")
             uds = await self._get_uds()
-            params = {"axis": axis, "speed": speed, "position": position}
+            params = {"t": axis, "spd": speed, "atc": position}
 
             intermediate.send("下发轴单步移动指令至下位机")
             resp = await uds.send_request(cmd="mov", params=params, timeout=timeout)
