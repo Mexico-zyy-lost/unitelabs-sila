@@ -205,7 +205,7 @@ class DebugFeature(sila.Feature):
     ) -> CommandResult:
         """指定轴以指定速度单步移动到目标位置"""
         try:
-            valid_axes = {"x", "y", "powder_z", "liquid_z", "gripper_z"}
+            valid_axes = {"X_M", "Y_M", "FFQ_M", "LID_M", "CLAM_Z", "PRESS_M", "ROTATE_M", "JF_M", "ZD_M"}
             if axis not in valid_axes:
                 raise DeviceCommandError(f"AxisStepMove invalid axis={axis!r}, supported={sorted(valid_axes)}")
 
