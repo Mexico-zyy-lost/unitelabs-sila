@@ -233,7 +233,7 @@ class DebugFeature(sila.Feature):
             return CommandResult.from_dict(False, str(e), {})
         except Exception as e:
             logger.exception("AxisStepMove exception")
-            err_msg = f"通信异常:{e!s}"
+            err_msg = f"通信超时:{e!s}"
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 

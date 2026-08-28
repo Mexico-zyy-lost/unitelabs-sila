@@ -105,11 +105,11 @@ class FFQFeature(sila.Feature):
 
             if type == 1:
                 resp = await uds.send_request(
-                    cmd="load_bucket_1", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                    cmd="load_bucket_1", params=req_params, uuid=exec_uuid_str, timeout=timeout
                 )
             elif type == 2:
                 resp = await uds.send_request(
-                    cmd="load_bucket_2", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                    cmd="load_bucket_2", params=req_params, uuid=exec_uuid_str, timeout=timeout
                 )
             ret_code = resp.get("code", -1)
 
@@ -179,11 +179,11 @@ class FFQFeature(sila.Feature):
 
             if type == 1:
                 resp = await uds.send_request(
-                    cmd="unload_bucket_1", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                    cmd="unload_bucket_1", params=req_params, uuid=exec_uuid_str, timeout=timeout
                 )
             elif type == 2:
                 resp = await uds.send_request(
-                    cmd="unload_bucket_2", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                    cmd="unload_bucket_2", params=req_params, uuid=exec_uuid_str, timeout=timeout
                 )
             ret_code = resp.get("code", -1)
 
@@ -263,7 +263,7 @@ class FFQFeature(sila.Feature):
             # 转为字符串，用于UDS、日志、下位机通信
             exec_uuid_str = str(exec_uuid)
 
-            resp = await uds.send_request(cmd="take_powder", params=req_params, req_id=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="take_powder", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -330,7 +330,7 @@ class FFQFeature(sila.Feature):
             # 转为字符串，用于UDS、日志、下位机通信
             exec_uuid_str = str(exec_uuid)
 
-            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, req_id=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:

@@ -115,13 +115,11 @@ class CAPFeature(sila.Feature):
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
             if mode == "open":
-                resp = await uds.send_request(
-                    cmd="rotate_open", params=req_params, req_id=exec_uuid_str, timeout=timeout
-                )
+                resp = await uds.send_request(cmd="rotate_open", params=req_params, uuid=exec_uuid_str, timeout=timeout)
                 intermediate.send("旋转开盖中...")
             else:
                 resp = await uds.send_request(
-                    cmd="rotate_close", params=req_params, req_id=exec_uuid_str, timeout=timeout
+                    cmd="rotate_close", params=req_params, uuid=exec_uuid_str, timeout=timeout
                 )
                 intermediate.send("旋转关盖中...")
             ret_code = resp.get("code", -1)
