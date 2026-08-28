@@ -213,8 +213,17 @@ class DebugFeature(sila.Feature):
             uds = await self._get_uds()
             params = {"t": axis, "spd": speed, "atc": position}
 
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
             intermediate.send("下发轴单步移动指令至下位机")
-            resp = await uds.send_request(cmd="mov", params=params, timeout=timeout)
+            resp = await uds.send_request(cmd="mov", params=params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "AxisStepMove command failed")
