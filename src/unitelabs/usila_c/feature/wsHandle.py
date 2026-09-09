@@ -21,7 +21,7 @@ class WsCommError(Exception):
 class WSFeature(sila.Feature):
     # 接收外部传入uds客户端实例
     def __init__(self, uds: UdsClient):
-        super().__init__(identifier="WS", version="1.0", name="WS")
+        super().__init__(identifier="Weighing", version="1.0", name="Weighing")
         logger.info("🟢 WSFeature initialized, UDS injected")
         # 使用传入的参数，不要再读取全局SHARED_UDS
         self.uds: UdsClient = uds
@@ -82,7 +82,7 @@ class WSFeature(sila.Feature):
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
-    @sila.ObservableProperty(name="GrossWeightGram")
+    @sila.ObservableProperty(name="Weight")
     async def GrossWeightGram(self) -> float:
         while True:
             try:

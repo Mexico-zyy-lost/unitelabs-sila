@@ -37,8 +37,8 @@ class DebugFeature(sila.Feature):
             self._connected = True
             logger.info("✅ DebugFeature UDS连接完成")
 
-    @sila.ObservableCommand(name="GripperRelease", errors=[DeviceCommandError])
-    async def GripperRelease(
+    @sila.ObservableCommand(name="GripperTest", errors=[DeviceCommandError])
+    async def GripperTest(
         self,
         *,
         speed: float,
@@ -52,19 +52,30 @@ class DebugFeature(sila.Feature):
         try:
             intermediate.send("开始夹爪松开")
             uds = await self._get_uds()
-            params = {"speed": speed, "position": position, "force": force}
+
+            target = "CLAMP"
+            params = {"t": target, "tod": position, "spd": speed, "mot": force}
 
             intermediate.send("下发夹爪松开指令至下位机")
-            resp = await uds.send_request(cmd="GripperRelease", params=params, timeout=timeout)
+
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+            resp = await uds.send_request(cmd="mov", params=params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
-                err_msg = resp.get("msg", "GripperRelease command failed")
-                raise DeviceCommandError(f"GripperRelease fail, code={ret_code}, msg={err_msg}")
+                err_msg = resp.get("msg", "GripperTest command failed")
+                raise DeviceCommandError(f"GripperTest fail, code={ret_code}, msg={err_msg}")
 
-            intermediate.send("夹爪松开完成")
+            intermediate.send("夹爪测试完成")
             return CommandResult.from_dict(
                 True,
-                "夹爪松开完成",
+                "夹爪测试完成",
                 {"speed": str(speed), "position": str(position), "force": str(force)},
             )
         except asyncio.CancelledError:
@@ -74,47 +85,6 @@ class DebugFeature(sila.Feature):
             return CommandResult.from_dict(False, str(e), {})
         except Exception as e:
             logger.exception("GripperRelease exception")
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
-
-    @sila.ObservableCommand(name="GripperGrasp", errors=[DeviceCommandError])
-    async def GripperGrasp(
-        self,
-        *,
-        speed: float,
-        position: float,
-        force: float,
-        timeout: int = 10,
-        status: sila.Status,
-        intermediate: sila.Intermediate[str],
-    ) -> CommandResult:
-        """以指定速度、力矩将夹爪夹紧至指定位置"""
-        try:
-            intermediate.send("开始夹爪夹紧")
-            uds = await self._get_uds()
-            params = {"speed": speed, "position": position, "force": force}
-
-            intermediate.send("下发夹爪夹紧指令至下位机")
-            resp = await uds.send_request(cmd="GripperGrasp", params=params, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "GripperGrasp command failed")
-                raise DeviceCommandError(f"GripperGrasp fail, code={ret_code}, msg={err_msg}")
-
-            intermediate.send("夹爪夹紧完成")
-            return CommandResult.from_dict(
-                True,
-                "夹爪夹紧完成",
-                {"speed": str(speed), "position": str(position), "force": str(force)},
-            )
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            intermediate.send(f"夹爪夹紧失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("GripperGrasp exception")
             err_msg = f"通信异常:{e!s}"
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
@@ -134,10 +104,20 @@ class DebugFeature(sila.Feature):
         try:
             intermediate.send("开始夹爪旋转")
             uds = await self._get_uds()
-            params = {"speed": speed, "position": position, "force": force}
+            target = "CLAMP"
+            params = {"t": target, "ang": position, "spd": speed, "mot": force}
 
             intermediate.send("下发夹爪旋转指令至下位机")
-            resp = await uds.send_request(cmd="GripperRotate", params=params, timeout=timeout)
+
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+            resp = await uds.send_request(cmd="mov", params=params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "GripperRotate command failed")
@@ -160,38 +140,6 @@ class DebugFeature(sila.Feature):
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
-    @sila.ObservableCommand(name="GripperHome", errors=[DeviceCommandError])
-    async def GripperHome(
-        self,
-        *,
-        timeout: int = 10,
-        status: sila.Status,
-        intermediate: sila.Intermediate[str],
-    ) -> CommandResult:
-        """夹爪回零点"""
-        try:
-            intermediate.send("开始夹爪归零")
-            uds = await self._get_uds()
-            intermediate.send("下发夹爪归零指令至下位机")
-            resp = await uds.send_request(cmd="GripperHome", params={}, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "GripperHome command failed")
-                raise DeviceCommandError(f"GripperHome fail, code={ret_code}, msg={err_msg}")
-
-            intermediate.send("夹爪归零完成")
-            return CommandResult.from_dict(True, "夹爪归零完成", {})
-        except asyncio.CancelledError:
-            raise
-        except DeviceCommandError as e:
-            intermediate.send(f"夹爪归零失败:{e!s}")
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("GripperHome exception")
-            err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
-            return CommandResult.from_dict(False, err_msg, {})
-
     @sila.ObservableCommand(name="AxisStepMove", errors=[DeviceCommandError])
     async def AxisStepMove(
         self,
@@ -205,7 +153,7 @@ class DebugFeature(sila.Feature):
     ) -> CommandResult:
         """指定轴以指定速度单步移动到目标位置"""
         try:
-            valid_axes = {"X_M", "Y_M", "FFQ_M", "LID_M", "CLAM_Z", "PRESS_M", "ROTATE_M", "JF_M", "ZD_M"}
+            valid_axes = {"X_M", "Y_M", "FFQ_M", "LID_M", "CLAMP_M", "PRESS_M", "ROTATE_M", "JF_M", "ZD_M"}
             if axis not in valid_axes:
                 raise DeviceCommandError(f"AxisStepMove invalid axis={axis!r}, supported={sorted(valid_axes)}")
 
@@ -245,40 +193,6 @@ class DebugFeature(sila.Feature):
             err_msg = f"通信超时:{e!s}"
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
-
-    @sila.UnobservableCommand(name="LedOn", errors=[DeviceCommandError])
-    async def LedOn(self, *, index: int, timeout: int = 10) -> CommandResult:
-        """打开指定索引的LED"""
-        try:
-            uds = await self._get_uds()
-            resp = await uds.send_request(cmd="LedOn", params={"index": index}, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "LedOn command failed")
-                raise DeviceCommandError(f"LedOn fail, code={ret_code}, msg={err_msg}")
-            return CommandResult.from_dict(True, "LED打开成功", {"index": str(index)})
-        except DeviceCommandError as e:
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("LedOn exception")
-            return CommandResult.from_dict(False, f"通信异常:{e!s}", {})
-
-    @sila.UnobservableCommand(name="LedOff", errors=[DeviceCommandError])
-    async def LedOff(self, *, index: int, timeout: int = 10) -> CommandResult:
-        """关闭指定索引的LED"""
-        try:
-            uds = await self._get_uds()
-            resp = await uds.send_request(cmd="LedOff", params={"index": index}, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "LedOff command failed")
-                raise DeviceCommandError(f"LedOff fail, code={ret_code}, msg={err_msg}")
-            return CommandResult.from_dict(True, "LED关闭成功", {"index": str(index)})
-        except DeviceCommandError as e:
-            return CommandResult.from_dict(False, str(e), {})
-        except Exception as e:
-            logger.exception("LedOff exception")
-            return CommandResult.from_dict(False, f"通信异常:{e!s}", {})
 
     @sila.ObservableCommand(name="PipettorHome", errors=[DeviceCommandError])
     async def PipettorHome(
