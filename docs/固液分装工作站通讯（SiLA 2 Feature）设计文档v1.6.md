@@ -1153,14 +1153,6 @@ CoordinateCalibration(
     <Property>
         <Identifier>DeviceState</Identifier>
         <DisplayName>设备状态</DisplayName>
-        <Description>0-空闲, 1-运行, 99-故障</Description>
-        <Observable>Yes</Observable>
-        <DataType><Basic>Integer</Basic></DataType>
-    </Property>
-
-    <Property>
-        <Identifier>FaultReason</Identifier>
-        <DisplayName>故障原因</DisplayName>
         <Description>当前故障描述，无故障时为空字符串</Description>
         <Observable>Yes</Observable>
         <DataType><Basic>String</Basic></DataType>
@@ -1249,17 +1241,9 @@ CoordinateCalibration(
     <Property>
         <Identifier>GripperForce</Identifier>
         <DisplayName>夹爪力矩</DisplayName>
-        <Description>夹爪当前力矩(N·m)</Description>
+        <Description>夹爪当前力矩(N·m)和当前张开宽度(mm)</Description>
         <Observable>Yes</Observable>
-        <DataType><Basic>Real</Basic></DataType>
-    </Property>
-
-    <Property>
-        <Identifier>GripperPosition</Identifier>
-        <DisplayName>夹爪位置</DisplayName>
-        <Description>夹爪当前张开宽度(mm)</Description>
-        <Observable>Yes</Observable>
-        <DataType><Basic>Real</Basic></DataType>
+        <DataType><Basic>String</Basic></DataType>
     </Property>
 
 </Feature>

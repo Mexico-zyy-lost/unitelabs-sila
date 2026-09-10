@@ -1,5 +1,6 @@
 import asyncio
 import json
+import uuid as uuid_module
 from typing import Any
 
 
@@ -14,6 +15,7 @@ class UdsClient:
     - answer 以 msg == "done" 表示执行完成，才作为最终状态
     - 其它回复直接透传，不额外包装
     - 超时时间通过每个 command 的结构体字段 mws 下发给下位机
+    - 等待超时时返回 code == -1 的业务错误回复
     """
 
     def __init__(self, sock_path: str, timeout: float = 10.0):
@@ -119,7 +121,7 @@ class UdsClient:
         if params is None:
             params = {}
         if uuid is None:
-            uuid = str(uuid.uuid4())
+            uuid = str(uuid_module.uuid4())
         if timeout is None:
             timeout = self.timeout
 
@@ -135,7 +137,15 @@ class UdsClient:
                 self.writer.write(payload.encode("utf-8"))
                 await self.writer.drain()
 
-            msg = await asyncio.wait_for(fut, timeout=timeout)
+            try:
+                msg = await asyncio.wait_for(fut, timeout=timeout)
+            except asyncio.TimeoutError:
+                return {
+                    "uuid": uuid,
+                    "code": -1,
+                    "msg": "timeout",
+                    "error": f"UDS request timed out after {timeout} seconds",
+                }
             if msg.get("uuid") is not None and msg.get("uuid") != uuid:
                 raise RuntimeError(f"UDS uuid mismatch, expect {uuid}, got {msg.get('uuid')}")
             return msg

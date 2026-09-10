@@ -167,7 +167,7 @@ class DeviceBaseFeature(sila.Feature):
                 yield int(resp["result"]["status"])
             except Exception as e:
                 logger.warning(f"读取DeviceState异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def FaultReason(self) -> str:
@@ -178,7 +178,7 @@ class DeviceBaseFeature(sila.Feature):
                 yield str(resp["result"]["fault_reason"])
             except Exception as e:
                 logger.warning(f"读取FaultReason异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def XPosition(self) -> float:
@@ -189,18 +189,20 @@ class DeviceBaseFeature(sila.Feature):
                 yield float(resp["result"]["logic"])
             except Exception as e:
                 logger.warning(f"读取XPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def XMotorPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetXPos", params={})
+
+                target = "X_M"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
                 logger.warning(f"读取XMotorPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def YPosition(self) -> float:
@@ -211,18 +213,19 @@ class DeviceBaseFeature(sila.Feature):
                 yield float(resp["result"]["logic"])
             except Exception as e:
                 logger.warning(f"读取YPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def YMotorPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetYPos", params={})
+                target = "Y_M"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
                 logger.warning(f"读取YMotorPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def PowderZPosition(self) -> float:
@@ -233,18 +236,19 @@ class DeviceBaseFeature(sila.Feature):
                 yield float(resp["result"]["logic"])
             except Exception as e:
                 logger.warning(f"读取PowderZPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def PowderZMotorPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetPowderZPos", params={})
+                target = "FFQ_M"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
                 logger.warning(f"读取PowderZMotorPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def GripperZPosition(self) -> float:
@@ -255,18 +259,19 @@ class DeviceBaseFeature(sila.Feature):
                 yield float(resp["result"]["logic"])
             except Exception as e:
                 logger.warning(f"读取GripperZPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def GripperZMotorPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetGripperZPos", params={})
+                target = "CLAMP_M"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
                 logger.warning(f"读取GripperZMotorPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def LiquidZPosition(self) -> float:
@@ -277,40 +282,43 @@ class DeviceBaseFeature(sila.Feature):
                 yield float(resp["result"]["logic"])
             except Exception as e:
                 logger.warning(f"读取LiquidZPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def LiquidZMotorPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetLiquidZPos", params={})
+                target = "LID_M"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
                 logger.warning(f"读取LiquidZMotorPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def GripperForce(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetGripperState", params={})
+                target = "LID"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["force"])
             except Exception as e:
                 logger.warning(f"读取GripperForce异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     @sila.ObservableProperty()
     async def GripperPosition(self) -> float:
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetGripperState", params={})
+                target = "LID"
+                resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["position"])
             except Exception as e:
                 logger.warning(f"读取GripperPosition异常 {e}")
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
 
     # ------------------------------
     # Commands
@@ -400,7 +408,7 @@ class DeviceBaseFeature(sila.Feature):
                 "FFQ_M": powder_z_speed,
                 "CLAM_M": gripper_z_speed,
                 "LID_M": liquid_z_speed,
-                "CLAM": gripper_speed,
+                "CLAMP": gripper_speed,
             }
 
             # 下位机需要逐个参数下发，不能一次性把所有速度值打包发送

@@ -247,7 +247,7 @@ class DebugFeature(sila.Feature):
         while True:
             try:
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="GetPipettorWorkState", params={}, timeout=10)
+                resp = await uds.send_request(cmd="Cp", params={}, timeout=10)
                 result = resp.get("result", {})
                 state = result.get("state", result.get("status", 0))
                 yield int(state)

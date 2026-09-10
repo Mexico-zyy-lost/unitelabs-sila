@@ -21,7 +21,13 @@ class WsCommError(Exception):
 class WSFeature(sila.Feature):
     # 接收外部传入uds客户端实例
     def __init__(self, uds: UdsClient):
-        super().__init__(identifier="Weighing", version="1.0", name="Weighing")
+        super().__init__(
+            identifier="Weighing",
+            version="1.0",
+            name="Weighing",
+            category="application",
+            description="天平功能集合，包含去皮、重量读取等功能",
+        )
         logger.info("🟢 WSFeature initialized, UDS injected")
         # 使用传入的参数，不要再读取全局SHARED_UDS
         self.uds: UdsClient = uds
