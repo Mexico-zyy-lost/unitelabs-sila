@@ -459,7 +459,17 @@ class DeviceBaseFeature(sila.Feature):
 
             intermediate.send("下发标定参数至下位机")
 
-            resp = await uds.send_request(cmd="CoordinateCalibration", params=req_params, timeout=timeout)
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+            resp = await uds.send_request(
+                cmd="CoordinateCalibration", params=req_params, uuid=exec_uuid_str, timeout=timeout
+            )
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "CoordinateCalibration failed")
