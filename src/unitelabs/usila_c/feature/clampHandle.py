@@ -80,8 +80,8 @@ class CLAMPFeature(sila.Feature):
             req_params = {
                 "source_position": {"x": source_position.x, "y": source_position.y, "z": source_position.z},
                 "target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
-                "gripper_param": {"position": gripper_param.position, "force": gripper_param.force},
-                "release_after_finish": release_after_finish,
+                "source_gripper_param": {"tod": gripper_param.position, "mot": gripper_param.force},
+                "target_gripper_param": {"tod": gripper_param.position, "mot": gripper_param.force},
             }
 
             intermediate.send("取料中...")
@@ -104,16 +104,16 @@ class CLAMPFeature(sila.Feature):
                 err_msg = resp.get("msg", "grab_tube command failed")
                 raise DeviceCommandError(f"grab_tube fail, code={ret_code}, msg={err_msg}")
 
-            intermediate.send("下发x、y运动指令至下位机")
-            resp = await uds.send_request(cmd="move_serial", params=req_params, uuid=exec_uuid_str, timeout=timeout)
-            ret_code = resp.get("code", -1)
-            if ret_code != 0:
-                err_msg = resp.get("msg", "move_serial command failed")
-                raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
+            # intermediate.send("下发x、y运动指令至下位机")
+            # resp = await uds.send_request(cmd="move_serial", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            # ret_code = resp.get("code", -1)
+            # if ret_code != 0:
+            #     err_msg = resp.get("msg", "move_serial command failed")
+            #     raise DeviceCommandError(f"move_serial fail, code={ret_code}, msg={err_msg}")
 
-            intermediate.send("下发放下试管指令至下位机")
-            resp = await uds.send_request(cmd="put_tube", params=req_params, uuid=exec_uuid_str, timeout=timeout)
-            ret_code = resp.get("code", -1)
+            # intermediate.send("下发放下试管指令至下位机")
+            # resp = await uds.send_request(cmd="put_tube", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            # ret_code = resp.get("code", -1)
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "put_tube command failed")
