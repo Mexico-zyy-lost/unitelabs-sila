@@ -57,7 +57,6 @@ class CAPFeature(sila.Feature):
         open_position: Position3D,
         cap_place_position: Position3D,
         open_gripper_param: GripperParam,
-        close_gripper_param: GripperParam,
         rotation_cycles: int,
         rotation_speed: float,
         rotation_force: float,
@@ -91,7 +90,6 @@ class CAPFeature(sila.Feature):
                 "open_position": {"x": open_position.x, "y": open_position.y, "z": open_position.z},
                 "cap_place_position": {"x": cap_place_position.x, "y": cap_place_position.y, "z": cap_place_position.z},
                 "open_gripper_param": {"tod": open_gripper_param.position, "mot": open_gripper_param.force},
-                "close_gripper_param": {"tod": close_gripper_param.position, "mot": close_gripper_param.force},
                 "rotation_cycles": rotation_cycles,
                 "rotation_speed": rotation_speed,
                 "rotation_force": rotation_force,
@@ -146,7 +144,6 @@ class CAPFeature(sila.Feature):
     async def CloseCap(
         self,
         *,
-        mode: str,
         container_diameter: float,
         open_position: Position3D,
         cap_place_position: Position3D,
@@ -182,9 +179,8 @@ class CAPFeature(sila.Feature):
 
             req_params = {
                 "container_diameter": container_diameter,
-                "open_position": {"x": open_position.x, "y": open_position.y, "z": open_position.z},
+                "close_position": {"x": close_position.x, "y": close_position.y, "z": close_position.z},
                 "cap_place_position": {"x": cap_place_position.x, "y": cap_place_position.y, "z": cap_place_position.z},
-                "open_gripper_param": {"position": open_gripper_param.position, "force": open_gripper_param.force},
                 "close_gripper_param": {"position": close_gripper_param.position, "force": close_gripper_param.force},
                 "rotation_cycles": rotation_cycles,
                 "rotation_speed": rotation_speed,
