@@ -99,18 +99,19 @@ class FFQFeature(sila.Feature):
             exec_uuid_str = str(exec_uuid)
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            req_params = {"load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z}}
+            # req_params = {
+            #     "type": type,
+            #     "load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z},
+            # }
 
-            # intermediate.send("下发装载指令至下位机")
+            # resp = await uds.send_request(cmd="load_bucket", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            # ret_code = resp.get("code", -1)
 
-            if type == 1:
-                resp = await uds.send_request(
-                    cmd="load_bucket_1", params=req_params, uuid=exec_uuid_str, timeout=timeout
-                )
-            elif type == 2:
-                resp = await uds.send_request(
-                    cmd="load_bucket_2", params=req_params, uuid=exec_uuid_str, timeout=timeout
-                )
+            req_params = {
+                "type": type,
+                "load_position": {"x": load_position.x, "y": load_position.y, "ffq_z": load_position.z},
+            }
+            resp = await uds.send_request(cmd="move_multi1", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -163,7 +164,9 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            req_params = {"unload_position": {"x": unload_position.x, "y": unload_position.y, "z": unload_position.z}}
+            req_params = {
+                "unload_position": {"x": unload_position.x, "y": unload_position.y, "ffq_z": unload_position.z}
+            }
 
             intermediate.send("下发卸载指令至下位机")
 
@@ -177,14 +180,8 @@ class FFQFeature(sila.Feature):
             exec_uuid_str = str(exec_uuid)
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            if type == 1:
-                resp = await uds.send_request(
-                    cmd="unload_bucket_1", params=req_params, uuid=exec_uuid_str, timeout=timeout
-                )
-            elif type == 2:
-                resp = await uds.send_request(
-                    cmd="unload_bucket_2", params=req_params, uuid=exec_uuid_str, timeout=timeout
-                )
+            resp = await uds.send_request(cmd="move_multi2", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -245,11 +242,13 @@ class FFQFeature(sila.Feature):
             uds = await self._get_uds()
 
             req_params = {
-                "target_x": target_x,
-                "target_y": target_y,
-                "powder_surface_z": powder_surface_z,
-                "pick_depth": pick_depth,
-                "compact_depth": compact_depth,
+                "take_position": {
+                    "x": target_x,
+                    "y": target_y,
+                    "ffq_z1": powder_surface_z,
+                    "pc": pick_depth,
+                    "ffq_z2": compact_depth,
+                }
             }
 
             intermediate.send("下发取粉指令至下位机")
@@ -263,7 +262,7 @@ class FFQFeature(sila.Feature):
             # 转为字符串，用于UDS、日志、下位机通信
             exec_uuid_str = str(exec_uuid)
 
-            resp = await uds.send_request(cmd="take_powder", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi3", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -317,7 +316,7 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            req_params = {"target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z}}
+            req_params = {"spit_position": {"x": target_position.x, "y": target_position.y, "ffq_z": target_position.z}}
 
             intermediate.send("下发吐粉指令至下位机")
 
@@ -330,7 +329,7 @@ class FFQFeature(sila.Feature):
             # 转为字符串，用于UDS、日志、下位机通信
             exec_uuid_str = str(exec_uuid)
 
-            resp = await uds.send_request(cmd="spit_powder_1", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi4", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
