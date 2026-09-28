@@ -49,18 +49,18 @@ class CAPFeature(sila.Feature):
     # ------------------------------
     # Commands
     # ------------------------------
-    @sila.ObservableCommand(name="rotate_open", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="OpenLid", errors=[DeviceCommandError])
     async def OpenCap(
         self,
         *,
-        container_diameter: float,
-        open_position: Position3D,
-        cap_place_position: Position3D,
-        open_gripper_param: GripperParam,
-        rotation_cycles: int,
-        rotation_speed: float,
-        rotation_force: float,
-        z_lift_height: float,
+        ContainerDiameter: float,
+        OpenPosition: Position3D,
+        LidPlacePosition: Position3D,
+        OpenGripperParam: GripperParam,
+        RotationCycles: int,
+        RotationSpeed: float,
+        RotationForce: float,
+        ZLiftHeight: float,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -68,14 +68,14 @@ class CAPFeature(sila.Feature):
         """
         开盖。Server自动选择夹爪Z轴。
 
-        .. parameter:: container_diameter: 容器直径（单位 mm）
-        .. parameter:: open_position: 开盖位置（逻辑坐标，单位 mm）
-        .. parameter:: cap_place_position: 盖子放置位置（逻辑坐标，单位 mm）
-        .. parameter:: open_gripper_param: 开盖夹爪参数
-        .. parameter:: rotation_cycles: 旋转圈数
-        .. parameter:: rotation_speed: 旋转速度（单位 rpm）
-        .. parameter:: rotation_force: 旋转力矩（单位 N·m）
-        .. parameter:: z_lift_height: Z抬升高度（单位 mm）
+        .. parameter:: ContainerDiameter: 容器直径（单位 mm）
+        .. parameter:: OpenPosition: 开盖位置（逻辑坐标，单位 mm）
+        .. parameter:: LidPlacePosition: 盖子放置位置（逻辑坐标，单位 mm）
+        .. parameter:: OpenGripperParam: 开盖夹爪参数
+        .. parameter:: RotationCycles: 旋转圈数
+        .. parameter:: RotationSpeed: 旋转速度（单位 rpm）
+        .. parameter:: RotationForce: 旋转力矩（单位 N·m）
+        .. parameter:: ZLiftHeight: Z抬升高度（单位 mm）
 
         Errors:
             DeviceCommandError: 设备底层命令执行失败
@@ -86,14 +86,14 @@ class CAPFeature(sila.Feature):
             uds = await self._get_uds()
 
             req_params = {
-                "container_diameter": container_diameter,
-                "open_position": {"x": open_position.x, "y": open_position.y, "z": open_position.z},
-                "cap_place_position": {"x": cap_place_position.x, "y": cap_place_position.y, "z": cap_place_position.z},
-                "open_gripper_param": {"tod": open_gripper_param.position, "mot": open_gripper_param.force},
-                "rotation_cycles": rotation_cycles,
-                "rotation_speed": rotation_speed,
-                "rotation_force": rotation_force,
-                "z_lift_height": z_lift_height,
+                "container_diameter": ContainerDiameter,
+                "OpenPosition": {"x": OpenPosition.x, "y": OpenPosition.y, "z": OpenPosition.z},
+                "cap_place_position": {"x": LidPlacePosition.x, "y": LidPlacePosition.y, "z": LidPlacePosition.z},
+                "open_gripper_param": {"tod": OpenGripperParam.position, "mot": OpenGripperParam.force},
+                "rotation_cycles": RotationCycles,
+                "rotation_speed": RotationSpeed,
+                "rotation_force": RotationForce,
+                "z_lift_height": ZLiftHeight,
             }
 
             intermediate.send("夹紧容器")
@@ -123,9 +123,9 @@ class CAPFeature(sila.Feature):
                 success=True,
                 message="开盖完成",
                 data={
-                    "container_diameter": str(container_diameter),
-                    "rotation_cycles": str(rotation_cycles),
-                    "rotation_speed": str(rotation_speed),
+                    "container_diameter": str(ContainerDiameter),
+                    "rotation_cycles": str(RotationCycles),
+                    "rotation_speed": str(RotationSpeed),
                 },
             )
 
@@ -140,19 +140,18 @@ class CAPFeature(sila.Feature):
             intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
-    @sila.ObservableCommand(name="rotate_close", errors=[DeviceCommandError])
+    @sila.ObservableCommand(name="CloseLid", errors=[DeviceCommandError])
     async def CloseCap(
         self,
         *,
-        container_diameter: float,
-        open_position: Position3D,
-        cap_place_position: Position3D,
-        open_gripper_param: GripperParam,
-        close_gripper_param: GripperParam,
-        rotation_cycles: int,
-        rotation_speed: float,
-        rotation_force: float,
-        z_lift_height: float,
+        ContainerDiameter: float,
+        ClosePosition: Position3D,
+        LidPickPosition: Position3D,
+        CloseGripperParam: GripperParam,
+        RotationCycles: int,
+        RotationSpeed: float,
+        RotationForce: float,
+        ZLiftHeight: float,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -160,14 +159,14 @@ class CAPFeature(sila.Feature):
         """
         关盖。Server自动选择夹爪Z轴。
 
-        .. parameter:: container_diameter: 容器直径（单位 mm）
-        .. parameter:: close_position: 关盖位置（逻辑坐标，单位 mm）
-        .. parameter:: cap_place_position: 盖子放置位置（逻辑坐标，单位 mm）
-        .. parameter:: close_gripper_param: 关盖夹爪参数
-        .. parameter:: rotation_cycles: 旋转圈数
-        .. parameter:: rotation_speed: 旋转速度（单位 rpm）
-        .. parameter:: rotation_force: 旋转力矩（单位 N·m）
-        .. parameter:: z_lift_height: Z抬升高度（单位 mm）
+        .. parameter:: ContainerDiameter: 容器直径（单位 mm）
+        .. parameter:: ClosePosition: 关盖位置（逻辑坐标，单位 mm）
+        .. parameter:: LidPickPosition: 盖子放置位置（逻辑坐标，单位 mm）
+        .. parameter:: CloseGripperParam: 关盖夹爪参数
+        .. parameter:: RotationCycles: 旋转圈数
+        .. parameter:: RotationSpeed: 旋转速度（单位 rpm）
+        .. parameter:: RotationForce: 旋转力矩（单位 N·m）
+        .. parameter:: ZLiftHeight: Z抬升高度（单位 mm）
 
         Errors:
             DeviceCommandError: 设备底层命令执行失败
@@ -178,14 +177,14 @@ class CAPFeature(sila.Feature):
             uds = await self._get_uds()
 
             req_params = {
-                "container_diameter": container_diameter,
-                "close_position": {"x": close_position.x, "y": close_position.y, "z": close_position.z},
-                "cap_place_position": {"x": cap_place_position.x, "y": cap_place_position.y, "z": cap_place_position.z},
-                "close_gripper_param": {"position": close_gripper_param.position, "force": close_gripper_param.force},
-                "rotation_cycles": rotation_cycles,
-                "rotation_speed": rotation_speed,
-                "rotation_force": rotation_force,
-                "z_lift_height": z_lift_height,
+                "container_diameter": ContainerDiameter,
+                "close_position": {"x": ClosePosition.x, "y": ClosePosition.y, "z": ClosePosition.z},
+                "cap_place_position": {"x": LidPickPosition.x, "y": LidPickPosition.y, "z": LidPickPosition.z},
+                "close_gripper_param": {"position": CloseGripperParam.position, "force": CloseGripperParam.force},
+                "rotation_cycles": RotationCycles,
+                "rotation_speed": RotationSpeed,
+                "rotation_force": RotationForce,
+                "z_lift_height": ZLiftHeight,
             }
 
             intermediate.send("夹紧容器")
