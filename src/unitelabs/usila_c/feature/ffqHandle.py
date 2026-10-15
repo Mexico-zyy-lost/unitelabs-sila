@@ -99,17 +99,13 @@ class FFQFeature(sila.Feature):
             exec_uuid_str = str(exec_uuid)
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            # req_params = {
-            #     "type": type,
-            #     "load_position": {"x": load_position.x, "y": load_position.y, "z": load_position.z},
-            # }
-
-            # resp = await uds.send_request(cmd="load_bucket", params=req_params, uuid=exec_uuid_str, timeout=timeout)
-            # ret_code = resp.get("code", -1)
-
             req_params = {
-                "type": type,
-                "load_position": {"x": load_position.x, "y": load_position.y, "ffq_z": load_position.z},
+                "load_position": {
+                    "x": load_position.x,
+                    "y": load_position.y,
+                    "z": load_position.z,
+                    "typ": type,
+                }
             }
             resp = await uds.send_request(cmd="move_multi1", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
@@ -164,9 +160,7 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            req_params = {
-                "unload_position": {"x": unload_position.x, "y": unload_position.y, "ffq_z": unload_position.z}
-            }
+            req_params = {"unload_position": {"x": unload_position.x, "y": unload_position.y, "z": unload_position.z}}
 
             intermediate.send("下发卸载指令至下位机")
 
@@ -230,7 +224,7 @@ class FFQFeature(sila.Feature):
         .. parameter:: target_x: 目标X坐标（逻辑坐标，单位 mm）
         .. parameter:: target_y: 目标Y坐标（逻辑坐标，单位 mm）
         .. parameter:: powder_surface_z: 粉面高度Z（逻辑坐标，单位 mm）
-        .. parameter:: pick_depth: 取粉深度（单位 mm）
+        .. parameter:: pick_depth: 探入粉面深度（单位 mm）
         .. parameter:: compact_depth: 压实深度（单位 mm）
 
         Errors:
@@ -245,9 +239,8 @@ class FFQFeature(sila.Feature):
                 "take_position": {
                     "x": target_x,
                     "y": target_y,
-                    "ffq_z1": powder_surface_z,
-                    "pc": pick_depth,
-                    "ffq_z2": compact_depth,
+                    "z": powder_surface_z,
+                    "id": pick_depth,
                 }
             }
 
@@ -298,6 +291,7 @@ class FFQFeature(sila.Feature):
     async def DispensePowder(
         self,
         *,
+        type: int = 1,
         target_position: Position3D,
         timeout: int = 10,
         status: sila.Status,
@@ -316,7 +310,89 @@ class FFQFeature(sila.Feature):
 
             uds = await self._get_uds()
 
-            req_params = {"spit_position": {"x": target_position.x, "y": target_position.y, "ffq_z": target_position.z}}
+            req_params = {
+                "spit_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z, "weg": 0}
+            }
+
+            intermediate.send("下发吐粉指令至下位机")
+
+            # 拿到CommandExecution对象
+            cmd_exec = status.command_execution
+
+            # 单次命令的CommandExecutionUUID（uuid.UUID对象）
+            exec_uuid = cmd_exec.command_execution_uuid
+
+            # 转为字符串，用于UDS、日志、下位机通信
+            exec_uuid_str = str(exec_uuid)
+
+            resp = await uds.send_request(cmd="move_multi4", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            ret_code = resp.get("code", -1)
+
+            if ret_code != 0:
+                err_msg = resp.get("msg", "spit_powder_1 command failed")
+                raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
+
+            intermediate.send("吐粉完成")
+
+            return CommandResult.from_dict(
+                success=True,
+                message="吐粉完成",
+                data={
+                    "target_position_x": str(target_position.x),
+                    "target_position_y": str(target_position.y),
+                    "target_position_z": str(target_position.z),
+                },
+            )
+
+        except asyncio.CancelledError:
+            raise
+        except DeviceCommandError as e:
+            intermediate.send(f"吐粉失败:{e!s}")
+            return CommandResult.from_dict(False, str(e), {})
+        except Exception as e:
+            logger.exception("DispensePowder exception")
+            err_msg = f"通信异常:{e!s}"
+            intermediate.send(err_msg)
+            return CommandResult.from_dict(False, err_msg, {})
+
+    @sila.ObservableCommand(name="WeightFollowDispense", errors=[DeviceCommandError])
+    async def WeightFollowDispense(
+        self,
+        *,
+        type: int = 1,
+        target_position: Position3D,
+        target_weight: float,
+        stopLead_time: float = 0.5,
+        dispense_speed: float = 1.0,
+        timeout: int = 10,
+        status: sila.Status,
+        intermediate: sila.Intermediate[str],
+    ) -> CommandResult:
+        """
+        吐粉2。
+
+        .. parameter:: target_position: 吐粉目标位置（逻辑坐标，单位 mm）
+        .. parameter:: target_weight: 吐粉目标重量（单位 g）
+        .. parameter:: stopLead_time: 停止提前时间（单位 s）
+        .. parameter:: dispense_speed: 吐粉速度（单位 mm/s）
+        Errors:
+            DeviceCommandError: 设备底层命令执行失败
+        """
+        try:
+            intermediate.send("开始吐粉")
+
+            uds = await self._get_uds()
+
+            req_params = {
+                "spit_position": {
+                    "x": target_position.x,
+                    "y": target_position.y,
+                    "z": target_position.z,
+                    "weg": target_weight,
+                }
+            }
+            #  "stopLead_time": stopLead_time,
+            #  "dispense_speed": dispense_speed,
 
             intermediate.send("下发吐粉指令至下位机")
 
