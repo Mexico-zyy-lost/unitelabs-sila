@@ -63,7 +63,7 @@ class WSFeature(sila.Feature):
         try:
             intermediate.send("开始去皮")
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="Tare", params={}, timeout=timeout)
+            resp = await uds.send_request(cmd="T", params={}, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "tare command failed")
