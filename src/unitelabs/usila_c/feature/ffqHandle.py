@@ -112,7 +112,9 @@ class FFQFeature(sila.Feature):
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "load_bucket command failed")
-                raise DeviceCommandError(f"load_bucket fail, code={ret_code}, msg={err_msg}")
+                failure_msg = f"load_bucket fail, code={ret_code}, msg={err_msg}"
+                intermediate.send(f"装载失败:{failure_msg}")
+                return CommandResult.from_dict(False, failure_msg, {})
 
             intermediate.send("粉桶装载完成")
 
@@ -180,7 +182,9 @@ class FFQFeature(sila.Feature):
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "unload_bucket command failed")
-                raise DeviceCommandError(f"unload_bucket fail, code={ret_code}, msg={err_msg}")
+                failure_msg = f"unload_bucket fail, code={ret_code}, msg={err_msg}"
+                intermediate.send(f"卸载失败:{failure_msg}")
+                return CommandResult.from_dict(False, failure_msg, {})
 
             intermediate.send("粉桶卸载完成")
 
@@ -260,7 +264,9 @@ class FFQFeature(sila.Feature):
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "take_powder command failed")
-                raise DeviceCommandError(f"take_powder fail, code={ret_code}, msg={err_msg}")
+                failure_msg = f"take_powder fail, code={ret_code}, msg={err_msg}"
+                intermediate.send(f"取粉失败:{failure_msg}")
+                return CommandResult.from_dict(False, failure_msg, {})
 
             intermediate.send("取粉完成")
 
@@ -330,7 +336,9 @@ class FFQFeature(sila.Feature):
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "spit_powder_1 command failed")
-                raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
+                failure_msg = f"spit_powder_1 fail, code={ret_code}, msg={err_msg}"
+                intermediate.send(f"吐粉失败:{failure_msg}")
+                return CommandResult.from_dict(False, failure_msg, {})
 
             intermediate.send("吐粉完成")
 
@@ -410,7 +418,9 @@ class FFQFeature(sila.Feature):
 
             if ret_code != 0:
                 err_msg = resp.get("msg", "spit_powder_1 command failed")
-                raise DeviceCommandError(f"spit_powder_1 fail, code={ret_code}, msg={err_msg}")
+                failure_msg = f"spit_powder_1 fail, code={ret_code}, msg={err_msg}"
+                intermediate.send(f"吐粉失败:{failure_msg}")
+                return CommandResult.from_dict(False, failure_msg, {})
 
             intermediate.send("吐粉完成")
 
