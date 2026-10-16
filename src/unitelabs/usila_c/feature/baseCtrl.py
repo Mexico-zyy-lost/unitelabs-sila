@@ -243,7 +243,7 @@ class DeviceBaseFeature(sila.Feature):
         while True:
             try:
                 uds = await self._get_uds()
-                target = "FFQ_M"
+                target = "FFQ_4"
                 resp = await uds.send_request(cmd="qry", params={"target": target})
                 yield float(resp["result"]["motor"])
             except Exception as e:
@@ -405,7 +405,7 @@ class DeviceBaseFeature(sila.Feature):
             params = {
                 "X_M": x_speed,
                 "Y_M": y_speed,
-                "FFQ_M": powder_z_speed,
+                "FFQ_4": powder_z_speed,
                 "CLAM_M": gripper_z_speed,
                 "LID_M": liquid_z_speed,
                 "CLAMP": gripper_speed,
