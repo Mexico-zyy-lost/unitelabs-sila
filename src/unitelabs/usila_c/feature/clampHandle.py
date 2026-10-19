@@ -82,6 +82,7 @@ class CLAMPFeature(sila.Feature):
                 "target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
                 "source_gripper_param": {"tod": gripper_param.position, "mot": gripper_param.force},
                 "target_gripper_param": {"tod": gripper_param.position, "mot": gripper_param.force},
+                "release_after_finish": release_after_finish,
             }
 
             intermediate.send("取料中...")
