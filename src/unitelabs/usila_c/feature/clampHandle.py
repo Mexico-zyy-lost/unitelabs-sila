@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime
 
 from unitelabs.cdk import sila
 
@@ -73,6 +74,9 @@ class CLAMPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            print(f"[{timestamp}] [UDS SEND]", "转移物料")
+
             intermediate.send("开始物料转移")
 
             uds = await self._get_uds()
@@ -106,6 +110,9 @@ class CLAMPFeature(sila.Feature):
                 raise DeviceCommandError(f"grab_tube fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("物料转移完成")
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            print(f"[{timestamp}] [UDS SEND]", "转移物料完成")
 
             return CommandResult.from_dict(
                 success=True,

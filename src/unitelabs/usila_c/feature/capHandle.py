@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime
 
 from unitelabs.cdk import sila
 
@@ -81,6 +82,9 @@ class CAPFeature(sila.Feature):
             DeviceCommandError: 设备底层命令执行失败
         """
         try:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            print(f"[{timestamp}] [UDS SEND]", "开始开盖")
+
             intermediate.send("开始开盖")
 
             uds = await self._get_uds()
@@ -118,6 +122,9 @@ class CAPFeature(sila.Feature):
                 raise DeviceCommandError(f"rotate_open fail, code={ret_code}, msg={err_msg}")
 
             intermediate.send("开盖完成")
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            print(f"[{timestamp}] [UDS SEND]", "开盖完成")
 
             return CommandResult.from_dict(
                 success=True,
