@@ -2,6 +2,7 @@ import asyncio
 import errno
 import json
 import uuid as uuid_module
+from datetime import datetime
 from typing import Any
 
 
@@ -29,6 +30,7 @@ class UdsClient:
         self.timeout = timeout
 
         self._pending: dict[str, asyncio.Future] = {}
+        self._pending_commands: dict[str, str] = {}
         self._subs: dict[str, list[asyncio.Queue]] = {}
         self._reader_task: asyncio.Task | None = None
         self._closed = False
@@ -65,6 +67,7 @@ class UdsClient:
             if not fut.done():
                 fut.set_exception(exc)
         self._pending.clear()
+        self._pending_commands.clear()
 
     async def _close_transport(self):
         """关掉当前 socket。调用方需已持有 _conn_lock，或处于进程退出。"""
@@ -97,7 +100,6 @@ class UdsClient:
                 if not line:
                     raise ConnectionError("UDS connection closed by peer")
                 raw = line.decode("utf-8").strip()
-                print("[UDS RECV]", raw)
                 try:
                     msg = json.loads(raw)
                 except Exception as exc:
@@ -105,6 +107,10 @@ class UdsClient:
                     continue
 
                 uuid = msg.get("uuid")
+                is_weight_request = uuid is not None and self._pending_commands.get(uuid) in {"T", "S"}
+                if not is_weight_request:
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                    print(f"[{timestamp}] [UDS RECV]", raw)
                 if uuid and uuid in self._pending:
                     fut = self._pending.get(uuid)
                     if fut is not None and not fut.done() and self._is_answer_message(msg):
@@ -201,7 +207,10 @@ class UdsClient:
             try:
                 try:
                     async with self._write_lock:
-                        print("[UDS SEND]", payload.strip())
+                        self._pending_commands[uuid] = cmd
+                        if cmd not in {"T", "S"}:
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                            print(f"[{timestamp}] [UDS SEND]", payload.strip())
                         writer = self.writer
                         if writer is None:
                             raise ConnectionError("UDS connection is not open")
@@ -229,6 +238,7 @@ class UdsClient:
                 return msg
             finally:
                 self._pending.pop(uuid, None)
+                self._pending_commands.pop(uuid, None)
                 if not fut.done():
                     fut.cancel()
                 elif not fut.cancelled():
