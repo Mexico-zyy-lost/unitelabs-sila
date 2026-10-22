@@ -402,24 +402,33 @@ class DeviceBaseFeature(sila.Feature):
         """
         try:
             uds = await self._get_uds()
-            params = {
+            speed_params = {
                 "X_M": x_speed,
                 "Y_M": y_speed,
                 "FFQ_4": powder_z_speed,
-                "CLAM_M": gripper_z_speed,
+                "CLAMP_M": gripper_z_speed,
                 "LID_M": liquid_z_speed,
                 "CLAMP": gripper_speed,
             }
 
             # 下位机需要逐个参数下发，不能一次性把所有速度值打包发送
-            for key, value in params.items():
-                resp = await uds.send_request(cmd="set", params={key: value}, timeout=timeout)
+            for axis, speed in speed_params.items():
+                resp = await uds.send_request(
+                    cmd="set",
+                    params={
+                        "t": axis,
+                        "spd": speed,
+                        "pos": speed,
+                        "mspd": speed,
+                    },
+                    timeout=timeout,
+                )
                 ret_code = resp.get("code", -1)
                 if ret_code != 0:
-                    err_msg = resp.get("msg", f"SetGeneralParameters {key} failed")
-                    raise DeviceCommandError(f"SetGeneralParameters fail, key={key}, code={ret_code}, msg={err_msg}")
+                    err_msg = resp.get("msg", f"SetGeneralParameters {axis} failed")
+                    raise DeviceCommandError(f"SetGeneralParameters fail, key={axis}, code={ret_code}, msg={err_msg}")
 
-            out_data = {k: str(v) for k, v in params.items()}
+            out_data = {k: str(v) for k, v in speed_params.items()}
             return CommandResult.from_dict(True, "通用参数设置成功", out_data)
         except DeviceCommandError as e:
             return CommandResult.from_dict(False, str(e), {})
