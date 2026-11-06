@@ -74,12 +74,12 @@ class LIDFeature(sila.Feature):
 
             req_params = {
                 "tip_position": {"x": tip_position.x, "y": tip_position.y, "z": tip_position.z},
-                "press_force": press_force,
+                "press_speed": press_force,
             }
 
             intermediate.send("下发安装指令至下位机")
 
-            resp = await uds.send_request(cmd="AttachTip", params=req_params, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi5", params=req_params, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -140,9 +140,8 @@ class LIDFeature(sila.Feature):
 
             req_params = {
                 "target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
-                "volume": volume,
-                "aspirate_speed": aspirate_speed,
-                "immersion_depth": immersion_depth,
+                "vol": volume,
+                "spd": aspirate_speed,
             }
 
             intermediate.send("针头下降中...")
@@ -159,7 +158,7 @@ class LIDFeature(sila.Feature):
 
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            resp = await uds.send_request(cmd="Aspirate", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi6", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -198,7 +197,7 @@ class LIDFeature(sila.Feature):
         target_position: Position3D,
         volume: float,
         dispense_speed: float,
-        immersion_depth: float,
+        RecoveryVolume: float,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -209,7 +208,7 @@ class LIDFeature(sila.Feature):
         .. parameter:: target_position: 排液位置（逻辑坐标，单位 mm）
         .. parameter:: volume: 排液体积（单位 μL）
         .. parameter:: dispense_speed: 排液速度（单位 μL/s）
-        .. parameter:: immersion_depth: 浸入深度（单位 mm）
+        .. parameter:: RecoveryVolume: 浸入深度（单位 mm）
 
         Errors:
             DeviceCommandError: 设备底层命令执行失败
@@ -220,10 +219,10 @@ class LIDFeature(sila.Feature):
             uds = await self._get_uds()
 
             req_params = {
-                "target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
-                "volume": volume,
-                "dispense_speed": dispense_speed,
-                "immersion_depth": immersion_depth,
+                "tip_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
+                "vol": volume,
+                "bVol": RecoveryVolume,
+                "spd": dispense_speed,
             }
 
             intermediate.send("针头下降中...")
@@ -240,7 +239,7 @@ class LIDFeature(sila.Feature):
 
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            resp = await uds.send_request(cmd="Dispense", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi7", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
@@ -297,8 +296,8 @@ class LIDFeature(sila.Feature):
             uds = await self._get_uds()
 
             req_params = {
-                "eject_position": {"x": eject_position.x, "y": eject_position.y, "z": eject_position.z},
-                "eject_force": eject_force,
+                "tip_position": {"x": eject_position.x, "y": eject_position.y, "z": eject_position.z},
+                "pow": eject_force,
             }
 
             intermediate.send("下发退Tip指令至下位机")
@@ -314,7 +313,7 @@ class LIDFeature(sila.Feature):
 
             intermediate.send(f"当前命令ExecutionUUID: {exec_uuid_str}")
 
-            resp = await uds.send_request(cmd="EjectTip", params=req_params, uuid=exec_uuid_str, timeout=timeout)
+            resp = await uds.send_request(cmd="move_multi8", params=req_params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
 
             if ret_code != 0:
