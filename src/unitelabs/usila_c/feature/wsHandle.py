@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import uuid
 
 from unitelabs.cdk import sila
 
@@ -57,19 +59,22 @@ class WSFeature(sila.Feature):
         self,
         *,
         timeout: int = 10,
-        status: sila.Status,
-        intermediate: sila.Intermediate[str],
     ) -> CommandResult:
         try:
-            intermediate.send("开始去皮")
+            # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            # print(f"[{timestamp}] [UDS SEND]", "开始去皮")
+            # intermediate.send("开始去皮")
             uds = await self._get_uds()
-            resp = await uds.send_request(cmd="T", params={}, timeout=timeout)
+            exec_uuid_str = str(uuid.uuid4())
+            target = "WS"
+            params = {"t": target}
+            resp = await uds.send_request(cmd="TI", params=params, uuid=exec_uuid_str, timeout=timeout)
             ret_code = resp.get("code", -1)
             if ret_code != 0:
                 err_msg = resp.get("msg", "tare command failed")
                 raise WsCommandError(f"WS tare fail, code={ret_code}, msg={err_msg}")
 
-            intermediate.send("去皮完成")
+            # intermediate.send("去皮完成")
             return CommandResult.from_dict(
                 success=True,
                 message="去皮成功",
@@ -80,31 +85,36 @@ class WSFeature(sila.Feature):
         except asyncio.CancelledError:
             raise
         except WsCommandError as e:
-            intermediate.send(f"去皮失败:{e!s}")
+            # intermediate.send(f"去皮失败:{e!s}")
             return CommandResult.from_dict(False, str(e), {})
         except Exception as e:
             logger.exception("Tare exception")
             err_msg = f"通信异常:{e!s}"
-            intermediate.send(err_msg)
+            # intermediate.send(err_msg)
             return CommandResult.from_dict(False, err_msg, {})
 
     @sila.ObservableProperty(name="Weight")
     async def GrossWeightGram(self) -> float:
         while True:
             try:
+                # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                # print(f"[{timestamp}] [UDS SEND]", "读取称数据")
+
                 uds = await self._get_uds()
-                resp = await uds.send_request(cmd="S", params={}, timeout=10)
+
+                exec_uuid_str = str(1234)
+                resp = await uds.send_request(cmd="S", params={}, uuid=exec_uuid_str, timeout=1)
                 ret_code = resp.get("code", -1)
                 if ret_code != 0:
                     err_msg = resp.get("msg", "gross weight read failed")
                     logger.warning(f"WS GrossWeightGram fail, code={ret_code}, msg={err_msg}")
                     yield 0.0
                 else:
-                    weight_g = float(resp.get("result", {}).get("weight_g", 0.0))
+                    weight_g = float(resp.get("result", {}).get("recv", 0.0)) / 10000.0
                     yield weight_g
             except asyncio.CancelledError:
                 raise
             except Exception as e:
                 logger.warning(f"读取天平异常 {e}")
-                yield 0.0
-            await asyncio.sleep(2)
+                yield 0
+            await asyncio.sleep(1)
