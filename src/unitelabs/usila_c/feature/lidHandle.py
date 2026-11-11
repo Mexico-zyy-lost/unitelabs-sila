@@ -142,6 +142,7 @@ class LIDFeature(sila.Feature):
                 "target_position": {"x": target_position.x, "y": target_position.y, "z": target_position.z},
                 "vol": volume,
                 "spd": aspirate_speed,
+                "id": immersion_depth,
             }
 
             intermediate.send("针头下降中...")
