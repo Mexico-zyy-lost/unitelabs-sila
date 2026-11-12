@@ -62,6 +62,7 @@ class CAPFeature(sila.Feature):
         RotationSpeed: float,
         RotationForce: float,
         ZLiftHeight: float,
+        ZSpeed: float,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -77,6 +78,7 @@ class CAPFeature(sila.Feature):
         .. parameter:: RotationSpeed: 旋转速度（单位 rpm）
         .. parameter:: RotationForce: 旋转力矩（单位 N·m）
         .. parameter:: ZLiftHeight: Z抬升高度（单位 mm）
+        .. parameter:: ZSpeed: Z抬升速度（单位 mm）
 
         Errors:
             DeviceCommandError: 设备底层命令执行失败
@@ -84,7 +86,6 @@ class CAPFeature(sila.Feature):
         try:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             print(f"[{timestamp}] [UDS SEND]", "开始开盖")
-
             intermediate.send("开始开盖")
 
             uds = await self._get_uds()
@@ -98,6 +99,7 @@ class CAPFeature(sila.Feature):
                 "rotation_speed": RotationSpeed,
                 "rotation_force": RotationForce,
                 "z_lift_height": ZLiftHeight,
+                "z_lift_speed": ZSpeed,
             }
 
             intermediate.send("夹紧容器")
@@ -159,6 +161,7 @@ class CAPFeature(sila.Feature):
         RotationSpeed: float,
         RotationForce: float,
         ZLiftHeight: float,
+        ZSpeed: float,
         timeout: int = 10,
         status: sila.Status,
         intermediate: sila.Intermediate[str],
@@ -174,6 +177,7 @@ class CAPFeature(sila.Feature):
         .. parameter:: RotationSpeed: 旋转速度（单位 rpm）
         .. parameter:: RotationForce: 旋转力矩（单位 N·m）
         .. parameter:: ZLiftHeight: Z抬升高度（单位 mm）
+        .. parameter:: ZSpeed: Z抬升高度（单位 mm）
 
         Errors:
             DeviceCommandError: 设备底层命令执行失败
@@ -192,6 +196,7 @@ class CAPFeature(sila.Feature):
                 "rotation_speed": RotationSpeed,
                 "rotation_force": RotationForce,
                 "z_lift_height": ZLiftHeight,
+                "z_lift_speed": ZSpeed,
             }
 
             intermediate.send("夹紧容器")
@@ -221,9 +226,9 @@ class CAPFeature(sila.Feature):
                 success=True,
                 message="关盖完成",
                 data={
-                    "container_diameter": str(container_diameter),
-                    "rotation_cycles": str(rotation_cycles),
-                    "rotation_speed": str(rotation_speed),
+                    "container_diameter": str(ContainerDiameter),
+                    "rotation_cycles": str(RotationCycles),
+                    "rotation_speed": str(RotationSpeed),
                 },
             )
 
